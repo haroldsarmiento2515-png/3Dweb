@@ -336,6 +336,141 @@
     {@const rotationBoost = animations.rotation}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
+    <!-- TECHNO-MINIMAL BACKGROUND ELEMENTS -->
+    <T.Group position={[0, 0, -2]} scale={scaleMultiplier}>
+      <!-- Outer rotating ring -->
+      <T.Mesh rotation.z={time * 0.15}>
+        <T.RingGeometry args={[4.5, 4.6, 64]} />
+        <T.MeshBasicMaterial
+          color={0x4a5568}
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+        />
+      </T.Mesh>
+
+      <!-- Middle rotating ring (opposite direction) -->
+      <T.Mesh rotation.z={-time * 0.2}>
+        <T.RingGeometry args={[3.8, 3.85, 64]} />
+        <T.MeshBasicMaterial
+          color={0x718096}
+          transparent
+          opacity={0.25}
+          side={THREE.DoubleSide}
+        />
+      </T.Mesh>
+
+      <!-- Inner dashed ring effect (segments) -->
+      {#each Array(12) as _, i}
+        {@const segAngle = (i / 12) * Math.PI * 2 + time * 0.1}
+        <T.Mesh
+          position={[Math.cos(segAngle) * 3.2, Math.sin(segAngle) * 3.2, 0]}
+          rotation.z={segAngle + Math.PI / 2}
+        >
+          <T.PlaneGeometry args={[0.4, 0.02]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.4} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Coordinate cross lines -->
+      <T.Line>
+        <T.BufferGeometry>
+          <T.BufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([-5, 0, 0, 5, 0, 0])}
+            itemSize={3}
+          />
+        </T.BufferGeometry>
+        <T.LineBasicMaterial color={0x4a5568} transparent opacity={0.15} />
+      </T.Line>
+      <T.Line>
+        <T.BufferGeometry>
+          <T.BufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array([0, -5, 0, 0, 5, 0])}
+            itemSize={3}
+          />
+        </T.BufferGeometry>
+        <T.LineBasicMaterial color={0x4a5568} transparent opacity={0.15} />
+      </T.Line>
+
+      <!-- Corner bracket markers -->
+      {#each [[1,1], [1,-1], [-1,1], [-1,-1]] as [dx, dy], i}
+        <T.Group position={[dx * 4, dy * 3.5, 0]}>
+          <T.Mesh position={[dx * -0.15, 0, 0]}>
+            <T.PlaneGeometry args={[0.3, 0.02]} />
+            <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.5} />
+          </T.Mesh>
+          <T.Mesh position={[0, dy * -0.15, 0]}>
+            <T.PlaneGeometry args={[0.02, 0.3]} />
+            <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.5} />
+          </T.Mesh>
+        </T.Group>
+      {/each}
+
+      <!-- Orbiting data points -->
+      {#each Array(8) as _, i}
+        {@const orbitAngle = (i / 8) * Math.PI * 2 + time * 0.25}
+        {@const orbitRadius = 3.5 + Math.sin(time * 0.5 + i) * 0.3}
+        <T.Mesh position={[Math.cos(orbitAngle) * orbitRadius, Math.sin(orbitAngle) * orbitRadius, 0]}>
+          <T.CircleGeometry args={[0.04, 8]} />
+          <T.MeshBasicMaterial color={0xffffff} transparent opacity={0.6} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Inner orbiting particles (faster) -->
+      {#each Array(6) as _, i}
+        {@const innerAngle = (i / 6) * Math.PI * 2 - time * 0.4}
+        <T.Mesh position={[Math.cos(innerAngle) * 2.5, Math.sin(innerAngle) * 2.5, 0]}>
+          <T.CircleGeometry args={[0.03, 6]} />
+          <T.MeshBasicMaterial color={0xa0aec0} transparent opacity={0.5} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Grid dots pattern -->
+      {#each Array(5) as _, xi}
+        {#each Array(5) as _, yi}
+          {@const gx = (xi - 2) * 1.5}
+          {@const gy = (yi - 2) * 1.5}
+          {@const dist = Math.sqrt(gx*gx + gy*gy)}
+          {#if dist > 1.5 && dist < 4}
+            <T.Mesh position={[gx, gy, 0]}>
+              <T.CircleGeometry args={[0.025, 6]} />
+              <T.MeshBasicMaterial
+                color={0x718096}
+                transparent
+                opacity={0.3 + Math.sin(time * 2 + xi + yi) * 0.1}
+              />
+            </T.Mesh>
+          {/if}
+        {/each}
+      {/each}
+
+      <!-- Scanning line effect -->
+      {@const scanY = Math.sin(time * 0.8) * 3}
+      <T.Mesh position={[0, scanY, 0]}>
+        <T.PlaneGeometry args={[8, 0.01]} />
+        <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.2} />
+      </T.Mesh>
+
+      <!-- Arc segments -->
+      {#each [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5] as baseAngle, i}
+        {@const arcRotation = baseAngle + time * 0.05 * (i % 2 === 0 ? 1 : -1)}
+        <T.Mesh rotation.z={arcRotation}>
+          <T.RingGeometry args={[4.2, 4.25, 16, 1, 0, Math.PI * 0.3]} />
+          <T.MeshBasicMaterial
+            color={0x718096}
+            transparent
+            opacity={0.35}
+            side={THREE.DoubleSide}
+          />
+        </T.Mesh>
+      {/each}
+    </T.Group>
+    <!-- END TECHNO-MINIMAL BACKGROUND -->
+
     <!-- Main rock mesh - loaded GLTF model -->
     {#if $rockGltf}
       {@const baseScale = isHovered ? 2.8 : 2.6}
