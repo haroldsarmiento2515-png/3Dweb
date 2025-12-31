@@ -128,13 +128,13 @@
       />
     </T.Mesh>
 
-    <!-- Outer atmosphere -->
+    <!-- Outer atmosphere (disabled - opacity set to 0) -->
     <T.Mesh scale={isActive ? 1.4 : 1.25}>
       <T.SphereGeometry args={[2, 32, 32]} />
       <T.MeshBasicMaterial
         color={hovered ? 0x8090a0 : 0x5a6570}
         transparent
-        opacity={(isActive ? 0.1 : 0.04) * opacity}
+        opacity={0}
         side={THREE.BackSide}
       />
     </T.Mesh>
