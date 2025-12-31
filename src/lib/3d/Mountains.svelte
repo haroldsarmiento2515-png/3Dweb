@@ -62,10 +62,10 @@
 </script>
 
 {#if isLoaded && mountainScene}
-  <!-- Main mountain - center back -->
+  <!-- Main mountain - center back, large and dominant -->
   <T.Group
-    position={[0, -8, -35]}
-    scale={[80, 80, 80]}
+    position={[0, -3, -18]}
+    scale={[120, 120, 120]}
     rotation={[0, 0, 0]}
   >
     <T is={mountainScene} />
@@ -73,18 +73,18 @@
 
   <!-- Second mountain - right side -->
   <T.Group
-    position={[35, -10, -45]}
-    scale={[70, 70, 70]}
-    rotation={[0, 0.3, 0]}
+    position={[25, -4, -22]}
+    scale={[100, 100, 100]}
+    rotation={[0, 0.5, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
 
   <!-- Third mountain - left side -->
   <T.Group
-    position={[-35, -9, -40]}
-    scale={[65, 65, 65]}
-    rotation={[0, -0.4, 0]}
+    position={[-25, -4, -20]}
+    scale={[95, 95, 95]}
+    rotation={[0, -0.5, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
