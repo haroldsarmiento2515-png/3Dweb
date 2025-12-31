@@ -147,10 +147,11 @@
     const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
     scrollProgress = scrollTop / scrollHeight;
 
-    // 5 sections: 0=Igloo (small), then directly to stones
-    if (scrollProgress < 0.10) currentSection = 0;
-    else if (scrollProgress < 0.35) currentSection = 1;
-    else if (scrollProgress < 0.60) currentSection = 2;
+    // 5 sections with longer hero for transition visibility
+    // Hero: 0-25%, Stone1: 25-50%, Stone2: 50-70%, Stone3: 70-85%, Stone4: 85-100%
+    if (scrollProgress < 0.25) currentSection = 0;
+    else if (scrollProgress < 0.50) currentSection = 1;
+    else if (scrollProgress < 0.70) currentSection = 2;
     else if (scrollProgress < 0.85) currentSection = 3;
     else currentSection = 4;
   }
@@ -276,11 +277,11 @@
   <!-- Scroll Container - Simple sections: Igloo + 4 Stones -->
   <div class="scroll-container relative" style="z-index: 0; pointer-events: none;">
     <section class="section" id="hero">
-      <div style="height: 20vh;"></div>
+      <div style="height: 100vh;"></div>
     </section>
 
     <section class="section" id="stone-1">
-      <div style="height: 50vh;"></div>
+      <div style="height: 80vh;"></div>
     </section>
 
     <section class="section" id="stone-2">
