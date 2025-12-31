@@ -112,11 +112,11 @@
     return 0;
   })();
 
-  // First stone exit animation - stone 1 sinks and shrinks when transitioning to stone 2
+  // First stone exit animation - stone 1 rises UP and exits when transitioning to stone 2
   $: firstStoneExitOffset = (() => {
     if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
       const easeIn = Math.pow(stone2TransitionProgress, 2);
-      return -8 * easeIn;  // Sinks down
+      return 12 * easeIn;  // Rises UP (positive Y)
     }
     return 0;
   })();

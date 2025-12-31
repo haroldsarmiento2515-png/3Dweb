@@ -3,9 +3,7 @@
 
   export let scrollProgress = 0;
 
-  // =====================
-  // TRANSITION 1: Igloo to Stone 1 (0.08 - 0.30)
-  // =====================
+  // Transition timing - matches MainScene.svelte transition zone (Igloo to Stone 1 only)
   const TRANSITION_START = 0.08;
   const TRANSITION_END = 0.30;
 
@@ -15,32 +13,10 @@
   ));
 
   // Peak intensity around middle, then fade out smoothly
-  $: effectIntensity1 = Math.sin(transitionProgress * Math.PI);
+  $: effectIntensity = Math.sin(transitionProgress * Math.PI);
 
-  // Is the first transition active?
-  $: isActive1 = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END;
-
-  // =====================
-  // TRANSITION 2: Stone 1 to Stone 2 (0.45 - 0.55)
-  // =====================
-  const STONE2_TRANSITION_START = 0.45;
-  const STONE2_TRANSITION_END = 0.55;
-
-  $: stone2TransitionProgress = Math.min(1, Math.max(0,
-    (scrollProgress - STONE2_TRANSITION_START) / (STONE2_TRANSITION_END - STONE2_TRANSITION_START)
-  ));
-
-  // Peak intensity around middle for stone 2 transition
-  $: effectIntensity2 = Math.sin(stone2TransitionProgress * Math.PI);
-
-  // Is the second transition active?
-  $: isActive2 = scrollProgress >= STONE2_TRANSITION_START && scrollProgress <= STONE2_TRANSITION_END;
-
-  // =====================
-  // COMBINED EFFECT VALUES
-  // =====================
-  $: isActive = isActive1 || isActive2;
-  $: effectIntensity = Math.max(effectIntensity1, effectIntensity2);
+  // Is the effect active?
+  $: isActive = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END;
 
   // Chromatic aberration offset (pixels) - dramatic distortion
   $: aberrationOffset = effectIntensity * 25;
