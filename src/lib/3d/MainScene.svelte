@@ -63,13 +63,9 @@
   });
 
   // =====================
-  // BACKGROUND COLOR - Clean gray with enhanced fog for blur effect
+  // BACKGROUND COLOR - Dark background, no fog/blur
   // =====================
-  const bgColor = 'rgb(180, 185, 195)';
-  const fogColor = 'rgb(180, 185, 195)';
-  // Tighter fog creates depth-based blur effect
-  const fogNear = 8;
-  const fogFar = 25;
+  const bgColor = '#0a0c10';
 
   function handleStoneClick(event) {
     dispatch('stoneClick', event.detail);
@@ -90,9 +86,8 @@
   far={100}
 />
 
-<!-- BACKGROUND & FOG -->
+<!-- BACKGROUND - Dark, no fog -->
 <T.Color attach="background" args={[bgColor]} />
-<T.Fog attach="fog" args={[fogColor, fogNear, fogFar]} />
 
 <!-- ===================== -->
 <!-- MAIN SCENE LIGHTING  -->
