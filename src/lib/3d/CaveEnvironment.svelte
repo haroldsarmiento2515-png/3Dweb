@@ -336,138 +336,159 @@
     {@const rotationBoost = animations.rotation}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
-    <!-- TECHNO-MINIMAL BACKGROUND ELEMENTS -->
+    <!-- TECHNO-MINIMAL BACKGROUND ELEMENTS (Angular/Geometric) -->
     <T.Group position={[0, 0, -2]} scale={scaleMultiplier}>
-      <!-- Outer rotating ring -->
-      <T.Mesh rotation.z={time * 0.15}>
-        <T.RingGeometry args={[4.5, 4.6, 64]} />
-        <T.MeshBasicMaterial
-          color={0x4a5568}
-          transparent
-          opacity={0.3}
-          side={THREE.DoubleSide}
-        />
-      </T.Mesh>
 
-      <!-- Middle rotating ring (opposite direction) -->
-      <T.Mesh rotation.z={-time * 0.2}>
-        <T.RingGeometry args={[3.8, 3.85, 64]} />
-        <T.MeshBasicMaterial
-          color={0x718096}
-          transparent
-          opacity={0.25}
-          side={THREE.DoubleSide}
-        />
-      </T.Mesh>
-
-      <!-- Inner dashed ring effect (segments) -->
-      {#each Array(12) as _, i}
-        {@const segAngle = (i / 12) * Math.PI * 2 + time * 0.1}
+      <!-- Outer hexagon frame (thin lines) -->
+      {#each Array(6) as _, i}
+        {@const angle1 = (i / 6) * Math.PI * 2 + time * 0.05}
+        {@const angle2 = ((i + 1) / 6) * Math.PI * 2 + time * 0.05}
+        {@const r = 4.5}
         <T.Mesh
-          position={[Math.cos(segAngle) * 3.2, Math.sin(segAngle) * 3.2, 0]}
-          rotation.z={segAngle + Math.PI / 2}
+          position={[
+            (Math.cos(angle1) * r + Math.cos(angle2) * r) / 2,
+            (Math.sin(angle1) * r + Math.sin(angle2) * r) / 2,
+            0
+          ]}
+          rotation.z={angle1 + Math.PI / 6}
         >
-          <T.PlaneGeometry args={[0.4, 0.02]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.4} />
+          <T.PlaneGeometry args={[r * 1.02, 0.008]} />
+          <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.35} />
         </T.Mesh>
       {/each}
 
-      <!-- Coordinate cross lines -->
-      <T.Line>
-        <T.BufferGeometry>
-          <T.BufferAttribute
-            attach="attributes-position"
-            count={2}
-            array={new Float32Array([-5, 0, 0, 5, 0, 0])}
-            itemSize={3}
-          />
-        </T.BufferGeometry>
-        <T.LineBasicMaterial color={0x4a5568} transparent opacity={0.15} />
-      </T.Line>
-      <T.Line>
-        <T.BufferGeometry>
-          <T.BufferAttribute
-            attach="attributes-position"
-            count={2}
-            array={new Float32Array([0, -5, 0, 0, 5, 0])}
-            itemSize={3}
-          />
-        </T.BufferGeometry>
-        <T.LineBasicMaterial color={0x4a5568} transparent opacity={0.15} />
-      </T.Line>
+      <!-- Inner hexagon (rotating opposite) -->
+      {#each Array(6) as _, i}
+        {@const angle1 = (i / 6) * Math.PI * 2 - time * 0.08}
+        {@const angle2 = ((i + 1) / 6) * Math.PI * 2 - time * 0.08}
+        {@const r = 3.2}
+        <T.Mesh
+          position={[
+            (Math.cos(angle1) * r + Math.cos(angle2) * r) / 2,
+            (Math.sin(angle1) * r + Math.sin(angle2) * r) / 2,
+            0
+          ]}
+          rotation.z={angle1 + Math.PI / 6}
+        >
+          <T.PlaneGeometry args={[r * 1.02, 0.006]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
+        </T.Mesh>
+      {/each}
 
-      <!-- Corner bracket markers -->
-      {#each [[1,1], [1,-1], [-1,1], [-1,-1]] as [dx, dy], i}
-        <T.Group position={[dx * 4, dy * 3.5, 0]}>
-          <T.Mesh position={[dx * -0.15, 0, 0]}>
-            <T.PlaneGeometry args={[0.3, 0.02]} />
+      <!-- Diagonal cross lines -->
+      {#each [Math.PI/4, -Math.PI/4, Math.PI/4 + Math.PI/2, -Math.PI/4 + Math.PI/2] as angle, i}
+        <T.Mesh rotation.z={angle}>
+          <T.PlaneGeometry args={[9, 0.005]} />
+          <T.MeshBasicMaterial color={0x4b5563} transparent opacity={0.12} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Corner bracket markers (angular) -->
+      {#each [[1,1], [1,-1], [-1,1], [-1,-1]] as [dx, dy]}
+        <T.Group position={[dx * 4.2, dy * 3.8, 0]}>
+          <T.Mesh position={[dx * -0.2, 0, 0]}>
+            <T.PlaneGeometry args={[0.4, 0.008]} />
             <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.5} />
           </T.Mesh>
-          <T.Mesh position={[0, dy * -0.15, 0]}>
-            <T.PlaneGeometry args={[0.02, 0.3]} />
+          <T.Mesh position={[0, dy * -0.2, 0]}>
+            <T.PlaneGeometry args={[0.008, 0.4]} />
             <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.5} />
           </T.Mesh>
         </T.Group>
       {/each}
 
-      <!-- Orbiting data points -->
-      {#each Array(8) as _, i}
-        {@const orbitAngle = (i / 8) * Math.PI * 2 + time * 0.25}
-        {@const orbitRadius = 3.5 + Math.sin(time * 0.5 + i) * 0.3}
-        <T.Mesh position={[Math.cos(orbitAngle) * orbitRadius, Math.sin(orbitAngle) * orbitRadius, 0]}>
-          <T.CircleGeometry args={[0.04, 8]} />
-          <T.MeshBasicMaterial color={0xffffff} transparent opacity={0.6} />
-        </T.Mesh>
-      {/each}
-
-      <!-- Inner orbiting particles (faster) -->
+      <!-- Triangle markers at hexagon vertices -->
       {#each Array(6) as _, i}
-        {@const innerAngle = (i / 6) * Math.PI * 2 - time * 0.4}
-        <T.Mesh position={[Math.cos(innerAngle) * 2.5, Math.sin(innerAngle) * 2.5, 0]}>
-          <T.CircleGeometry args={[0.03, 6]} />
-          <T.MeshBasicMaterial color={0xa0aec0} transparent opacity={0.5} />
+        {@const angle = (i / 6) * Math.PI * 2 + time * 0.05}
+        {@const r = 4.5}
+        <T.Group position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]}>
+          <!-- Small dot at vertex -->
+          <T.Mesh>
+            <T.CircleGeometry args={[0.04, 4]} />
+            <T.MeshBasicMaterial color={0xd1d5db} transparent opacity={0.6} />
+          </T.Mesh>
+        </T.Group>
+      {/each}
+
+      <!-- Connecting lines from center to outer points -->
+      {#each Array(6) as _, i}
+        {@const angle = (i / 6) * Math.PI * 2 + Math.PI/6 + time * 0.03}
+        <T.Mesh rotation.z={angle}>
+          <T.PlaneGeometry args={[3.5, 0.004]} />
+          <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.15} />
         </T.Mesh>
       {/each}
 
-      <!-- Grid dots pattern -->
-      {#each Array(5) as _, xi}
-        {#each Array(5) as _, yi}
-          {@const gx = (xi - 2) * 1.5}
-          {@const gy = (yi - 2) * 1.5}
-          {@const dist = Math.sqrt(gx*gx + gy*gy)}
-          {#if dist > 1.5 && dist < 4}
-            <T.Mesh position={[gx, gy, 0]}>
-              <T.CircleGeometry args={[0.025, 6]} />
+      <!-- Moving data points along edges -->
+      {#each Array(6) as _, i}
+        {@const baseAngle = (i / 6) * Math.PI * 2}
+        {@const progress = ((time * 0.3 + i * 0.5) % 1)}
+        {@const angle1 = baseAngle + time * 0.05}
+        {@const angle2 = ((i + 1) / 6) * Math.PI * 2 + time * 0.05}
+        {@const r = 4.5}
+        {@const x = Math.cos(angle1) * r + (Math.cos(angle2) * r - Math.cos(angle1) * r) * progress}
+        {@const y = Math.sin(angle1) * r + (Math.sin(angle2) * r - Math.sin(angle1) * r) * progress}
+        <T.Mesh position={[x, y, 0]}>
+          <T.CircleGeometry args={[0.03, 4]} />
+          <T.MeshBasicMaterial color={0xffffff} transparent opacity={0.7} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Inner triangle (slowly rotating) -->
+      {#each Array(3) as _, i}
+        {@const angle1 = (i / 3) * Math.PI * 2 + time * 0.06}
+        {@const angle2 = ((i + 1) / 3) * Math.PI * 2 + time * 0.06}
+        {@const r = 2.2}
+        <T.Mesh
+          position={[
+            (Math.cos(angle1) * r + Math.cos(angle2) * r) / 2,
+            (Math.sin(angle1) * r + Math.sin(angle2) * r) / 2,
+            0
+          ]}
+          rotation.z={angle1 + Math.PI / 3}
+        >
+          <T.PlaneGeometry args={[r * 1.73, 0.006]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.2} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Scanning line (horizontal, thin) -->
+      {@const scanY = Math.sin(time * 0.6) * 3.5}
+      <T.Mesh position={[0, scanY, 0]}>
+        <T.PlaneGeometry args={[9, 0.003]} />
+        <T.MeshBasicMaterial color={0xd1d5db} transparent opacity={0.15} />
+      </T.Mesh>
+
+      <!-- Small grid dots at intersections -->
+      {#each [-2, 0, 2] as gx}
+        {#each [-2, 0, 2] as gy}
+          {#if !(gx === 0 && gy === 0)}
+            <T.Mesh position={[gx * 1.2, gy * 1.2, 0]}>
+              <T.CircleGeometry args={[0.02, 4]} />
               <T.MeshBasicMaterial
-                color={0x718096}
+                color={0x9ca3af}
                 transparent
-                opacity={0.3 + Math.sin(time * 2 + xi + yi) * 0.1}
+                opacity={0.25 + Math.sin(time * 1.5 + gx + gy) * 0.1}
               />
             </T.Mesh>
           {/if}
         {/each}
       {/each}
 
-      <!-- Scanning line effect -->
-      {@const scanY = Math.sin(time * 0.8) * 3}
-      <T.Mesh position={[0, scanY, 0]}>
-        <T.PlaneGeometry args={[8, 0.01]} />
-        <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.2} />
-      </T.Mesh>
-
-      <!-- Arc segments -->
-      {#each [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5] as baseAngle, i}
-        {@const arcRotation = baseAngle + time * 0.05 * (i % 2 === 0 ? 1 : -1)}
-        <T.Mesh rotation.z={arcRotation}>
-          <T.RingGeometry args={[4.2, 4.25, 16, 1, 0, Math.PI * 0.3]} />
-          <T.MeshBasicMaterial
-            color={0x718096}
-            transparent
-            opacity={0.35}
-            side={THREE.DoubleSide}
-          />
-        </T.Mesh>
+      <!-- Outer corner angular accents -->
+      {#each [[5, 2], [-5, 2], [5, -2], [-5, -2], [3, 4], [-3, 4], [3, -4], [-3, -4]] as [px, py], i}
+        <T.Group position={[px, py, 0]} rotation.z={Math.atan2(py, px) + Math.PI}>
+          <T.Mesh position={[0.15, 0, 0]}>
+            <T.PlaneGeometry args={[0.3, 0.005]} />
+            <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.3} />
+          </T.Mesh>
+          <T.Mesh position={[0.3, 0.08, 0]} rotation.z={Math.PI/3}>
+            <T.PlaneGeometry args={[0.15, 0.005]} />
+            <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.3} />
+          </T.Mesh>
+        </T.Group>
       {/each}
+
     </T.Group>
     <!-- END TECHNO-MINIMAL BACKGROUND -->
 
