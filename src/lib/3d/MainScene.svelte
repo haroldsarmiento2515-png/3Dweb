@@ -4,7 +4,6 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import * as THREE from 'three';
   import Igloo from './Igloo.svelte';
-  import Ground from './Ground.svelte';
   import Mountains from './Mountains.svelte';
   import CaveEnvironment from './CaveEnvironment.svelte';
   import PortalTransition from './PortalTransition.svelte';
@@ -244,7 +243,6 @@
 {#if iglooVisible}
   <T.Group>
     <Mountains opacity={iglooOpacity} />
-    <Ground currentPhase={currentSection} {scrollProgress} opacity={iglooOpacity} />
     <Igloo {scrollProgress} visible={true} opacity={iglooOpacity} />
   </T.Group>
 {/if}
