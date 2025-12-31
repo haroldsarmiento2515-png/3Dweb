@@ -65,6 +65,12 @@ body {
 }
 
 .ui-overlay > * {
+  pointer-events: none;
+}
+
+.ui-overlay .ui-element,
+.ui-overlay button,
+.ui-overlay a {
   pointer-events: auto;
 }
 
