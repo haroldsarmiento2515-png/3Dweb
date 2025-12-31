@@ -231,13 +231,6 @@
       </div>
     </div>
 
-    <!-- Click hint when viewing stones -->
-    {#if isViewingStone && !modalOpen}
-      <div class="click-hint visible">
-        <p class="text-label">Click stone to explore</p>
-      </div>
-    {/if}
-
     <!-- Clickable stone overlay - positioned over the 3D stone -->
     {#if isViewingStone && !modalOpen}
       <button
@@ -314,35 +307,22 @@
     height: 8px;
   }
 
-  .click-hint {
-    position: fixed;
-    bottom: 8rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 15;
-    pointer-events: none;
-  }
-
-  .click-hint.visible {
-    opacity: 1;
-  }
-
   .stone-click-area {
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 45%;
+    left: 35%;
     transform: translate(-50%, -50%);
-    width: 350px;
-    height: 400px;
+    width: 320px;
+    height: 380px;
     background: transparent;
     border: none;
     cursor: pointer;
     z-index: 5;
-    border-radius: 50%;
+    border-radius: 40%;
   }
 
   .stone-click-area:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .stone-click-area:focus {

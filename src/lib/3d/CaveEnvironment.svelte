@@ -271,60 +271,8 @@
         decay={2}
       />
 
-      <!-- HTML Labels - Only show when modal is closed -->
-      {#if !modalOpen}
-        <!-- HTML Labels - Top Left with connecting line -->
-        <HTML
-          position={[-3.8, 2.2, 0]}
-          center
-          occlude={false}
-          style="pointer-events: none;"
-        >
-          <div class="stone-info top-left" class:hovered={isHovered}>
-            <div class="info-id">PORTFOLIO_CO_{String(index + 1).padStart(2, '0')}</div>
-            <div class="info-name">{stone.name.toUpperCase().replace(' ', '_')}</div>
-            <!-- Connecting line -->
-            <svg class="connector-line top-left-line" width="120" height="60" viewBox="0 0 120 60">
-              <line x1="0" y1="0" x2="100" y2="50" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
-              <circle cx="100" cy="50" r="3" fill="rgba(255,255,255,0.6)"/>
-            </svg>
-          </div>
-        </HTML>
-
-        <!-- HTML Labels - Right Side Temperature -->
-        <HTML
-          position={[4.2, 0.8, 0]}
-          center
-          occlude={false}
-          style="pointer-events: none;"
-        >
-          <div class="stone-info right-side" class:hovered={isHovered}>
-            <div class="temp-row">
-              <span class="temp-label">TEMP</span>
-              <span class="temp-value">{(25 + Math.sin(index * 2) * 8).toFixed(2)}°</span>
-            </div>
-            <div class="temp-secondary">+{(Math.abs(-3 + Math.cos(index * 2) * 4)).toFixed(2)}</div>
-          </div>
-        </HTML>
-
-        <!-- HTML Labels - Bottom with date and CTA -->
-        <HTML
-          position={[1.5, -2.0, 0]}
-          center
-          occlude={false}
-          style="pointer-events: none;"
-        >
-          <div class="stone-info bottom-info" class:hovered={isHovered}>
-            <!-- Connecting line from stone -->
-            <svg class="connector-line bottom-line" width="80" height="50" viewBox="0 0 80 50">
-              <line x1="0" y1="50" x2="60" y2="10" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
-              <circle cx="0" cy="50" r="3" fill="rgba(255,255,255,0.6)"/>
-            </svg>
-            <div class="date-text">D {formatDate()}</div>
-            <div class="cta-text">CLICK TO EXPLORE</div>
-          </div>
-        </HTML>
-      {/if}
+      <!-- HTML Labels - Hidden for cleaner look -->
+      <!-- Labels are now handled by the UI overlay -->
 
     </T.Group>
   {/if}
