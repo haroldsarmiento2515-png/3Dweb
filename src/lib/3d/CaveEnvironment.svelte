@@ -404,23 +404,23 @@
       </T.Mesh>
     {/if}
 
-      <!-- Subtle inner glow -->
+      <!-- Subtle inner glow (disabled - opacity set to 0) -->
       <T.Mesh scale={0.6} rotation.y={rotY} rotation.x={rotX}>
         <T.SphereGeometry args={[2.0, 16, 16]} />
         <T.MeshBasicMaterial
           color={0x5a6a7a}
           transparent
-          opacity={0.08 * opacity}
+          opacity={0}
         />
       </T.Mesh>
 
-      <!-- Outer atmosphere glow -->
+      <!-- Outer atmosphere glow (disabled - opacity set to 0) -->
       <T.Mesh scale={isHovered ? 1.3 : 1.2}>
         <T.SphereGeometry args={[2.4, 32, 32]} />
         <T.MeshBasicMaterial
           color={isHovered ? 0x9aaaaa : 0x6a7a8a}
           transparent
-          opacity={(isHovered ? 0.08 : 0.03) * opacity}
+          opacity={0}
           side={THREE.BackSide}
         />
       </T.Mesh>

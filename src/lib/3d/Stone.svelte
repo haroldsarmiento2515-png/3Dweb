@@ -118,13 +118,13 @@
       />
     </T.Mesh>
 
-    <!-- Inner glow sphere -->
+    <!-- Inner glow sphere (disabled - opacity set to 0) -->
     <T.Mesh scale={0.6} rotation.y={rotationY}>
       <T.SphereGeometry args={[1.8, 16, 16]} />
       <T.MeshBasicMaterial
         color={new THREE.Color(color).multiplyScalar(1.2)}
         transparent
-        opacity={0.08 * opacity}
+        opacity={0}
       />
     </T.Mesh>
 
