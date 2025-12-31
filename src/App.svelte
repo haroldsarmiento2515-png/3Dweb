@@ -314,12 +314,11 @@
     transform: translate(-50%, -50%);
     width: 320px;
     height: 380px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0);
     border: none;
     cursor: pointer;
-    z-index: 2;
+    z-index: 50;
     border-radius: 40%;
-    opacity: 0;
   }
 
   .stone-click-area:focus {
