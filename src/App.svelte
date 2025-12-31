@@ -237,6 +237,16 @@
         <p class="text-label">Click stone to explore</p>
       </div>
     {/if}
+
+    <!-- Clickable stone overlay - positioned over the 3D stone -->
+    {#if isViewingStone && !modalOpen}
+      <button
+        class="stone-click-area"
+        on:click={() => handleStoneClick(currentStone)}
+        aria-label="Click to explore {currentStone?.name}"
+      >
+      </button>
+    {/if}
   {/if}
 
   <!-- Scroll Container - Simple sections: Igloo + 4 Stones -->
@@ -315,5 +325,27 @@
 
   .click-hint.visible {
     opacity: 1;
+  }
+
+  .stone-click-area {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 400px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 5;
+    border-radius: 50%;
+  }
+
+  .stone-click-area:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .stone-click-area:focus {
+    outline: none;
   }
 </style>
