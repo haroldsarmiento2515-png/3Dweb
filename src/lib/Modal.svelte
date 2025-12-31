@@ -151,9 +151,9 @@
     inset: 0;
     z-index: 100;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 6rem 4rem;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
     background: rgba(10, 12, 16, 0);
     transition: background 0.5s ease;
     overflow-y: auto;
@@ -181,8 +181,10 @@
     position: relative;
     max-width: 580px;
     width: 100%;
-    padding: 2rem 0;
-    margin-left: 5%;
+    padding: 2rem;
+    text-align: center;
+    max-height: 85vh;
+    overflow-y: auto;
   }
 
   .close-btn {
@@ -255,6 +257,7 @@
 
   .content-section {
     margin-bottom: 2.5rem;
+    text-align: left;
   }
 
   .section-header {
@@ -309,11 +312,10 @@
 
   @media (max-width: 1024px) {
     .modal-backdrop {
-      padding: 5rem 3rem;
+      padding: 2rem;
     }
 
     .modal-content {
-      margin-left: 0;
       max-width: 100%;
     }
 
@@ -325,10 +327,11 @@
 
   @media (max-width: 768px) {
     .modal-backdrop {
-      padding: 4rem 2rem;
+      padding: 1.5rem;
     }
 
     .modal-content {
+      padding: 1.5rem;
       padding-top: 4rem;
     }
 

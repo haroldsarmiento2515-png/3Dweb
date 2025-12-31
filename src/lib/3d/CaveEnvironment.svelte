@@ -32,10 +32,8 @@
     return 3;
   })();
 
-  // Stone position - shifts right and zooms when modal is open
-  $: stonePosition = modalOpen
-    ? { x: 3.5, y: 1.2, z: 1 }  // Move right and forward when modal open
-    : { x: 0, y: 1.5, z: 0 };   // Center position normally
+  // Stone position - stays centered when modal is open
+  $: stonePosition = { x: 0, y: 1.5, z: 0 };  // Always centered
 
   // Scale modifier for modal state
   $: modalScaleBoost = modalOpen ? 1.15 : 1;
