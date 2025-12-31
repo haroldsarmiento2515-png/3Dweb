@@ -160,9 +160,9 @@
   {@const rotY = time * 0.12 + index * Math.PI * 0.5}
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
 
-  <!-- Stone visibility based on section -->
+  <!-- Stone visibility based on section - first stone visible earlier during transition -->
   {@const stoneVisible = (
-    (index === 0 && currentSection >= 3 && currentSection <= 4) ||
+    (index === 0 && currentSection >= 2 && currentSection <= 4) ||
     (index === 1 && currentSection >= 4 && currentSection <= 6) ||
     (index === 2 && currentSection >= 6 && currentSection <= 8) ||
     (index === 3 && currentSection >= 8 && currentSection <= 10)

@@ -3,16 +3,16 @@
 
   export let scrollProgress = 0;
 
-  // Transition timing (matches MainScene.svelte)
+  // Transition timing - extended to cover first stone appearance
   const TRANSITION_START = 0.05;
-  const TRANSITION_END = 0.12;
+  const TRANSITION_END = 0.18;  // Extended to overlap with first stone section
 
   // Calculate effect intensity based on scroll progress
   $: transitionProgress = Math.min(1, Math.max(0,
     (scrollProgress - TRANSITION_START) / (TRANSITION_END - TRANSITION_START)
   ));
 
-  // Peak intensity in the middle of transition
+  // Peak intensity around middle, then fade out
   $: effectIntensity = Math.sin(transitionProgress * Math.PI);
 
   // Is the effect active?
