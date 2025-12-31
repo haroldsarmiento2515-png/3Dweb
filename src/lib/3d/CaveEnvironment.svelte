@@ -168,10 +168,17 @@
         rotation.x={modalOpen ? rotX * 0.3 : rotX}
         rotation.z={index * 0.3}
         scale={finalScale}
-        on:click={() => handleStoneClick(stone, index)}
-        on:pointerenter={() => handleStoneEnter(index)}
-        on:pointerleave={handleStoneLeave}
       >
+        <!-- Invisible hitbox for reliable click detection -->
+        <T.Mesh
+          on:click={() => handleStoneClick(stone, index)}
+          on:pointerenter={() => handleStoneEnter(index)}
+          on:pointerleave={handleStoneLeave}
+        >
+          <T.SphereGeometry args={[1.2, 16, 16]} />
+          <T.MeshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </T.Mesh>
+
         {#each Object.values($rockGltf.nodes) as node}
           {#if node.isMesh}
             <T.Mesh
