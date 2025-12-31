@@ -27,8 +27,8 @@
   // Glitch bar count (more at peak intensity)
   $: glitchBarCount = Math.floor(effectIntensity * 12);
 
-  // Fog intensity
-  $: fogOpacity = effectIntensity * 0.7;
+  // Fog intensity - reduced to not obscure scene
+  $: fogOpacity = effectIntensity * 0.3;
 
   // Generate random glitch bars
   let glitchBars = [];
@@ -125,7 +125,7 @@
 
   <!-- Vignette Intensifier -->
   {#if isActive}
-    <div class="vignette-intense" style="opacity: {effectIntensity * 0.8};"></div>
+    <div class="vignette-intense" style="opacity: {effectIntensity * 0.4};"></div>
   {/if}
 </div>
 
@@ -229,10 +229,10 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at center,
-      rgba(200, 210, 220, 0.9) 0%,
-      rgba(180, 190, 200, 0.6) 30%,
-      rgba(150, 160, 170, 0.3) 60%,
-      transparent 100%
+      transparent 0%,
+      rgba(200, 210, 220, 0.2) 30%,
+      rgba(180, 190, 200, 0.4) 60%,
+      rgba(150, 160, 170, 0.5) 100%
     );
   }
 
@@ -271,10 +271,10 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at center,
-      transparent 10%,
-      rgba(20, 30, 40, 0.3) 40%,
-      rgba(10, 15, 25, 0.7) 70%,
-      rgba(5, 10, 15, 0.95) 100%
+      transparent 30%,
+      rgba(20, 30, 40, 0.2) 50%,
+      rgba(10, 15, 25, 0.4) 75%,
+      rgba(5, 10, 15, 0.6) 100%
     );
   }
 </style>
