@@ -122,6 +122,15 @@
     }, 300); // Match the modal content exit animation duration
   }
 
+  // Lock/unlock scroll when modal opens/closes
+  $: if (typeof document !== 'undefined') {
+    if (modalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else if (!isClosing) {
+      document.body.style.overflow = '';
+    }
+  }
+
   // Get which stone is active (0-3) based on section
   $: currentStoneIndex = Math.max(0, currentSection - 1);
 
