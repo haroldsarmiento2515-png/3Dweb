@@ -23,51 +23,41 @@
   let cameraRef;
   
   // =====================
-  // SCENE TRANSITION CONFIG (new flow with travel transitions)
-  // Hero(0-2%), Entrance(2-5%), Portal(5-9%), 
-  // Stone1(9-18%), Travel(18-24%), Stone2(24-33%), Travel(33-39%), 
-  // Stone3(39-48%), Travel(48-54%), Stone4(54-63%), 
-  // Exit(63-70%), Finale(70-100%)
+  // SCENE TRANSITION CONFIG (simplified - no exit transition)
+  // Hero(0-2%), Entrance(2-5%), Portal(5-9%),
+  // Stone1(9-18%), Travel(18-24%), Stone2(24-33%), Travel(33-39%),
+  // Stone3(39-48%), Travel(48-54%), Stone4(54-63%), Cave continues(63-100%)
   // =====================
   const ENTRANCE_START = 0.02;
   const ENTRANCE_END = 0.05;
   const PORTAL_START = 0.05;
   const PORTAL_END = 0.09;
   const CAVE_START = 0.09;   // When we enter the cave proper
-  const CAVE_END = 0.63;     // When we start exiting
-  const EXIT_START = 0.63;
-  const EXIT_END = 0.70;
-  
+  const CAVE_END = 1.0;      // Cave continues to the end
+
   // Calculate entrance transition (descending)
-  $: entranceProgress = Math.min(1, Math.max(0, 
+  $: entranceProgress = Math.min(1, Math.max(0,
     (scrollProgress - ENTRANCE_START) / (ENTRANCE_END - ENTRANCE_START)
   ));
-  
+
   // Calculate portal transition
-  $: portalProgress = Math.min(1, Math.max(0, 
+  $: portalProgress = Math.min(1, Math.max(0,
     (scrollProgress - PORTAL_START) / (PORTAL_END - PORTAL_START)
   ));
-  
+
   // Combined entry progress (entrance + portal = 0→1)
-  $: entryProgress = scrollProgress < PORTAL_START 
-    ? entranceProgress * 0.5 
+  $: entryProgress = scrollProgress < PORTAL_START
+    ? entranceProgress * 0.5
     : 0.5 + portalProgress * 0.5;
-  
-  // Calculate exit transition (0 = still in cave, 1 = back outside)
-  $: exitProgress = Math.min(1, Math.max(0, 
-    (scrollProgress - EXIT_START) / (EXIT_END - EXIT_START)
-  ));
-  
-  // Combined transition: 0 = igloo/outside, 1 = cave/inside
-  $: transitionProgress = scrollProgress < EXIT_START 
-    ? entryProgress 
-    : entryProgress * (1 - exitProgress);
-  
+
+  // Combined transition: 0 = igloo/outside, 1 = cave/inside (no exit transition)
+  $: transitionProgress = entryProgress;
+
   // How deep into the cave (0-1 while inside cave section)
   // This drives camera Z position through the cave
-  $: caveDepthProgress = scrollProgress > CAVE_START && scrollProgress < CAVE_END
-    ? (scrollProgress - CAVE_START) / (CAVE_END - CAVE_START)
-    : scrollProgress >= CAVE_END ? 1 : 0;
+  $: caveDepthProgress = scrollProgress > CAVE_START
+    ? Math.min(1, (scrollProgress - CAVE_START) / (0.63 - CAVE_START))
+    : 0;
   
   // Scene visibility
   $: iglooOpacity = 1 - transitionProgress;
@@ -78,10 +68,6 @@
   
   // Portal active states
   $: portalActive = scrollProgress > PORTAL_START && scrollProgress < PORTAL_END;
-  
-  // Exit state
-  $: isExiting = scrollProgress >= EXIT_START && scrollProgress <= EXIT_END;
-  $: exitIntensity = isExiting ? Math.sin(exitProgress * Math.PI) : 0;
   
   // =====================
   // CAMERA POSITIONS
@@ -119,23 +105,12 @@
       cameraX = lerp(iglooCamPos.x, caveCamPos.x, t) + (mousePosition.x - 0.5) * (2 - t * 1.5);
       cameraY = lerp(iglooCamPos.y, caveCamPos.y, t) + (mousePosition.y - 0.5) * (1 - t * 0.5);
       cameraZ = lerp(iglooCamPos.z, caveCamPos.z, t);
-    } else if (scrollProgress < EXIT_START) {
-      // Inside cave - traveling deeper through stones
+    } else {
+      // Inside cave - traveling deeper through stones (stays in cave)
       const t = caveDepthProgress;
       cameraX = lerp(caveCamPos.x, caveDeepPos.x, t) + (mousePosition.x - 0.5) * 0.5;
       cameraY = lerp(caveCamPos.y, caveDeepPos.y, t) + (mousePosition.y - 0.5) * 0.3;
       cameraZ = lerp(caveCamPos.z, caveDeepPos.z, t);
-    } else if (scrollProgress < EXIT_END) {
-      // Exiting cave - reverse journey back out
-      const t = easeInOutCubic(exitProgress);
-      cameraX = lerp(caveDeepPos.x, iglooCamPos.x, t) + (mousePosition.x - 0.5) * (0.5 + t * 1.5);
-      cameraY = lerp(caveDeepPos.y, iglooCamPos.y, t) + (mousePosition.y - 0.5) * (0.3 + t * 0.7);
-      cameraZ = lerp(caveDeepPos.z, iglooCamPos.z, t);
-    } else {
-      // Back at igloo (Finale)
-      cameraX = iglooCamPos.x + (mousePosition.x - 0.5) * 2;
-      cameraY = iglooCamPos.y + (mousePosition.y - 0.5) * 1;
-      cameraZ = iglooCamPos.z;
     }
   }
   
@@ -188,7 +163,7 @@
   bind:ref={cameraRef}
   makeDefault
   position={[cameraX, cameraY, cameraZ]}
-  fov={lerp(45, 55 - exitProgress * 10, smoothTransition)}
+  fov={lerp(45, 55, smoothTransition)}
   near={0.1}
   far={150}
 />
@@ -225,17 +200,6 @@
   <T.DirectionalLight position={[0, 4, -15]} intensity={0.3 * caveOpacity} color={0x4488aa} />
 {/if}
 
-<!-- ===================== -->
-<!-- EXIT LIGHTING        -->
-<!-- ===================== -->
-{#if isExiting}
-  <!-- Bright light from exit -->
-  <T.PointLight position={[0, 3, 8]} intensity={exitIntensity * 5} color={0xffffff} distance={25} decay={1} />
-  <T.DirectionalLight position={[0, 8, 15]} intensity={exitIntensity * 3} color={0xffffff} />
-  
-  <!-- Warm sunlight coming from outside -->
-  <T.DirectionalLight position={[3, 10, 20]} intensity={exitIntensity * 2} color={0xfff4e8} />
-{/if}
 
 <!-- ===================== -->
 <!-- IGLOO SCENE          -->
@@ -272,56 +236,11 @@
   {/if}
 {/if}
 
-<!-- ===================== -->
-<!-- EXIT PORTAL          -->
-<!-- ===================== -->
-{#if isExiting}
-  <PortalTransition 
-    progress={exitProgress}
-    active={true}
-    isExiting={true}
-  />
-{/if}
-
-<!-- ===================== -->
-<!-- EXIT LIGHT RAYS      -->
-<!-- ===================== -->
-{#if isExiting}
-  <!-- Radial light rays from exit -->
-  <T.Group position={[0, 2, 10]}>
-    {#each Array(10) as _, i}
-      <T.Mesh 
-        position={[Math.cos(i / 10 * Math.PI * 2) * 4, Math.sin(i / 10 * Math.PI * 2) * 4, 0]}
-        rotation={[0, 0, i / 10 * Math.PI * 2]}
-      >
-        <T.PlaneGeometry args={[0.6, 20]} />
-        <T.MeshBasicMaterial
-          color={0xffffff}
-          transparent
-          opacity={exitIntensity * 0.15}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-        />
-      </T.Mesh>
-    {/each}
-  </T.Group>
-  
-  <!-- Exit portal glow -->
-  <T.Mesh position={[0, 2, 12]}>
-    <T.CircleGeometry args={[6, 32]} />
-    <T.MeshBasicMaterial
-      color={0xd9e0eb}
-      transparent
-      opacity={exitIntensity * 0.6}
-      side={THREE.DoubleSide}
-    />
-  </T.Mesh>
-{/if}
 
 <!-- ===================== -->
 <!-- TRANSITION PARTICLES -->
 <!-- ===================== -->
-{#if (entryProgress > 0 && entryProgress < 1) || isExiting}
+{#if entryProgress > 0 && entryProgress < 1}
   <T.Points>
     <T.BufferGeometry>
       <T.BufferAttribute
@@ -334,10 +253,10 @@
       />
     </T.BufferGeometry>
     <T.PointsMaterial
-      color={isExiting ? 0xffffff : 0x4de8ff}
-      size={isExiting ? 0.1 : 0.06}
+      color={0x4de8ff}
+      size={0.06}
       transparent
-      opacity={0.6 * Math.sin((isExiting ? exitProgress : entryProgress) * Math.PI)}
+      opacity={0.6 * Math.sin(entryProgress * Math.PI)}
       blending={THREE.AdditiveBlending}
     />
   </T.Points>

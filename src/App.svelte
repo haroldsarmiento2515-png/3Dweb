@@ -28,9 +28,7 @@
     'Traveling',
     'Specimen 03',
     'Traveling',
-    'Specimen 04',
-    'Ascending',
-    'Surface'
+    'Specimen 04'
   ];
 
   // Stone data for the gallery
@@ -120,30 +118,28 @@
   })();
   
   $: currentStone = stones[currentStoneIndex];
-  $: isInCave = scrollProgress > 0.06 && scrollProgress < 0.92;
+  $: isInCave = scrollProgress > 0.06;
   $: isViewingStone = [3, 5, 7, 9].includes(currentSection);
 
   // Handle scroll
   function handleScroll() {
     const scrollContainer = document.querySelector('.scroll-container');
     if (!scrollContainer) return;
-    
+
     const scrollTop = window.scrollY;
     const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
     scrollProgress = scrollTop / scrollHeight;
-    
+
     if (scrollProgress < 0.02) currentSection = 0;
     else if (scrollProgress < 0.05) currentSection = 1;
     else if (scrollProgress < 0.09) currentSection = 2;
-    else if (scrollProgress < 0.18) currentSection = 3;
-    else if (scrollProgress < 0.24) currentSection = 4;
-    else if (scrollProgress < 0.33) currentSection = 5;
-    else if (scrollProgress < 0.39) currentSection = 6;
-    else if (scrollProgress < 0.48) currentSection = 7;
-    else if (scrollProgress < 0.54) currentSection = 8;
-    else if (scrollProgress < 0.63) currentSection = 9;
-    else if (scrollProgress < 0.70) currentSection = 10;
-    else currentSection = 11;
+    else if (scrollProgress < 0.20) currentSection = 3;
+    else if (scrollProgress < 0.30) currentSection = 4;
+    else if (scrollProgress < 0.45) currentSection = 5;
+    else if (scrollProgress < 0.55) currentSection = 6;
+    else if (scrollProgress < 0.70) currentSection = 7;
+    else if (scrollProgress < 0.80) currentSection = 8;
+    else currentSection = 9;
   }
 
   onMount(() => {
@@ -236,10 +232,10 @@
           </span>
         </div>
 
-        <!-- Right: Progress indicator (12 dots) -->
+        <!-- Right: Progress indicator (10 dots) -->
         <div class="ui-element flex gap-1.5">
-          {#each Array(12) as _, i}
-            <div 
+          {#each Array(10) as _, i}
+            <div
               class="progress-dot"
               class:active={currentSection >= i}
               class:stone-dot={[3, 5, 7, 9].includes(i)}
@@ -296,29 +292,7 @@
     </section>
 
     <section class="section" id="stone-4">
-      <div style="height: 225vh;"></div>
-    </section>
-
-    <section class="section" id="exit">
-      <div style="height: 175vh;"></div>
-    </section>
-
-    <section class="section" id="finale">
-      <div style="height: 750vh;" class="flex items-center justify-center">
-        <div class="text-center px-6 finale-content">
-          <p class="text-label mb-4">// End of Discovery</p>
-          <h2 class="text-3xl md:text-4xl font-light mb-6" style="color: var(--ice-white);">
-            The journey continues.
-          </h2>
-          <a 
-            href="#hero" 
-            class="interactive text-label px-6 py-3 border inline-block"
-            style="border-color: var(--ice-dark);"
-          >
-            [ Return to Surface ]
-          </a>
-        </div>
-      </div>
+      <div style="height: 500vh;"></div>
     </section>
   </div>
 
@@ -375,9 +349,5 @@
 
   .click-hint.visible {
     opacity: 1;
-  }
-
-  .finale-content {
-    pointer-events: auto;
   }
 </style>
