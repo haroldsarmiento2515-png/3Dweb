@@ -23,7 +23,7 @@
 
   // =====================
   // SCENE TRANSITION CONFIG (simplified - direct transition)
-  // Hero(0-9%), then Platform with stones (9-100%)
+  // Hero(0-5%), Transition(5-12%), Platform with stones (12-100%)
   // =====================
   const TRANSITION_START = 0.05;
   const TRANSITION_END = 0.12;
@@ -47,9 +47,18 @@
   $: platformVisible = transitionProgress > 0.01;
 
   // =====================
-  // CAMERA POSITIONS
+  // IGLOO SCENE TRANSFORM (shrinks and moves down during transition)
   // =====================
-  const iglooCamPos = { x: 9, y: 5, z: 9 };
+  $: iglooScale = 1 - transitionProgress * 0.7;  // Shrinks from 1 to 0.3
+  $: iglooY = -transitionProgress * 15;  // Moves down
+  $: iglooZ = -transitionProgress * 20;  // Moves away
+
+  // =====================
+  // CAMERA POSITIONS
+  // Camera stays relatively still, just rises up during transition
+  // =====================
+  const heroCamPos = { x: 9, y: 5, z: 9 };
+  const transitionCamPos = { x: 5, y: 8, z: 6 };  // Camera rises up
   const platformCamPos = { x: 0, y: 2, z: 4 };
   const platformDeepPos = { x: 0, y: 1.5, z: -24 };
 
@@ -64,34 +73,41 @@
   $: smoothTransition = easeInOutCubic(transitionProgress);
 
   // Camera position based on scroll phase
-  let cameraX = iglooCamPos.x;
-  let cameraY = iglooCamPos.y;
-  let cameraZ = iglooCamPos.z;
+  let cameraX = heroCamPos.x;
+  let cameraY = heroCamPos.y;
+  let cameraZ = heroCamPos.z;
 
   $: {
     if (scrollProgress < TRANSITION_START) {
-      // Outside igloo (Hero)
-      cameraX = iglooCamPos.x + (mousePosition.x - 0.5) * 2;
-      cameraY = iglooCamPos.y + (mousePosition.y - 0.5) * 1;
-      cameraZ = iglooCamPos.z;
+      // Hero view of igloo
+      cameraX = heroCamPos.x + (mousePosition.x - 0.5) * 2;
+      cameraY = heroCamPos.y + (mousePosition.y - 0.5) * 1;
+      cameraZ = heroCamPos.z;
     } else if (scrollProgress < TRANSITION_END) {
-      // Transitioning to platform
+      // Transition - camera rises up as igloo shrinks away
       const t = smoothTransition;
-      cameraX = lerp(iglooCamPos.x, platformCamPos.x, t) + (mousePosition.x - 0.5) * (2 - t * 1.5);
-      cameraY = lerp(iglooCamPos.y, platformCamPos.y, t) + (mousePosition.y - 0.5) * (1 - t * 0.5);
-      cameraZ = lerp(iglooCamPos.z, platformCamPos.z, t);
+      cameraX = lerp(heroCamPos.x, transitionCamPos.x, t) + (mousePosition.x - 0.5) * (2 - t);
+      cameraY = lerp(heroCamPos.y, transitionCamPos.y, t) + (mousePosition.y - 0.5) * (1 - t * 0.5);
+      cameraZ = lerp(heroCamPos.z, transitionCamPos.z, t);
     } else {
       // On platform - traveling through stones
+      // First interpolate from transition position to platform position
+      const platformT = Math.min(1, (scrollProgress - TRANSITION_END) / 0.05);
+      const baseX = lerp(transitionCamPos.x, platformCamPos.x, platformT);
+      const baseY = lerp(transitionCamPos.y, platformCamPos.y, platformT);
+      const baseZ = lerp(transitionCamPos.z, platformCamPos.z, platformT);
+
+      // Then move through the platform
       const t = platformDepthProgress;
-      cameraX = lerp(platformCamPos.x, platformDeepPos.x, t) + (mousePosition.x - 0.5) * 0.5;
-      cameraY = lerp(platformCamPos.y, platformDeepPos.y, t) + (mousePosition.y - 0.5) * 0.3;
-      cameraZ = lerp(platformCamPos.z, platformDeepPos.z, t);
+      cameraX = lerp(baseX, platformDeepPos.x, t) + (mousePosition.x - 0.5) * 0.5;
+      cameraY = lerp(baseY, platformDeepPos.y, t) + (mousePosition.y - 0.5) * 0.3;
+      cameraZ = lerp(baseZ, platformDeepPos.z, t);
     }
   }
 
-  // Camera look target
-  $: lookAtY = lerp(1, 1.5, smoothTransition);
-  $: lookAtZ = lerp(0, -5 * platformDepthProgress, transitionProgress);
+  // Camera look target - looks down at igloo during transition, then forward
+  $: lookAtY = lerp(0, 1.5, smoothTransition);
+  $: lookAtZ = lerp(-5, -5 * platformDepthProgress, transitionProgress);
 
   useTask(() => {
     if (cameraRef) {
@@ -176,10 +192,13 @@
 
 
 <!-- ===================== -->
-<!-- IGLOO SCENE          -->
+<!-- IGLOO SCENE (shrinks and moves away during transition) -->
 <!-- ===================== -->
 {#if iglooVisible}
-  <T.Group>
+  <T.Group
+    position={[0, iglooY, iglooZ]}
+    scale={[iglooScale, iglooScale, iglooScale]}
+  >
     <Mountains opacity={iglooOpacity} />
     <Igloo {scrollProgress} visible={true} opacity={iglooOpacity} />
   </T.Group>
