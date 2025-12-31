@@ -189,8 +189,8 @@
   <!-- Wireframe Overlay Effect -->
   <WireframeOverlay {scrollProgress} />
 
-  <!-- Transition Effects disabled for clean scrolling -->
-  <!-- <TransitionEffects {scrollProgress} /> -->
+  <!-- Transition Effects - Frost/chromatic aberration during igloo-to-stone transition -->
+  <TransitionEffects {scrollProgress} />
 
   <!-- UI Overlay -->
   {#if showUI}
