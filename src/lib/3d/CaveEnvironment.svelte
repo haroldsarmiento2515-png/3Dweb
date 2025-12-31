@@ -3,7 +3,7 @@
   import { HTML, useGltf } from '@threlte/extras';
   import { createEventDispatcher, onMount } from 'svelte';
   import * as THREE from 'three';
-  
+
   // Load the rock GLTF model
   const rockGltf = useGltf('/models/rock/scene.gltf');
 
@@ -18,68 +18,33 @@
   const dispatch = createEventDispatcher();
 
   let time = 0;
-  
+
   // Stone sections mapping:
   // Section 3: Stone 1, Section 5: Stone 2, Section 7: Stone 3, Section 9: Stone 4
   // Travel sections: 4 (1→2), 6 (2→3), 8 (3→4)
-  
+
   // Calculate which stone is currently active
   $: activeStoneIndex = (() => {
     if (currentSection === 3) return 0;
-    if (currentSection === 4) return 0; // Transitioning away from stone 1
+    if (currentSection === 4) return 0;
     if (currentSection === 5) return 1;
-    if (currentSection === 6) return 1; // Transitioning away from stone 2
+    if (currentSection === 6) return 1;
     if (currentSection === 7) return 2;
-    if (currentSection === 8) return 2; // Transitioning away from stone 3
+    if (currentSection === 8) return 2;
     if (currentSection === 9) return 3;
     return 0;
   })();
 
   // Stone positions - each stone centered for its section
-  // Camera travels from z=4 to z=-24 (28 units) over caveDepthProgress 0→1
-  // Section 3 (Stone 1): ~0-15% of cave depth → camera at z≈4 to z=0
-  // Section 5 (Stone 2): ~30-45% of cave depth → camera at z≈-4 to z=-8  
-  // Section 7 (Stone 3): ~55-70% of cave depth → camera at z≈-11 to z=-15
-  // Section 9 (Stone 4): ~80-95% of cave depth → camera at z≈-18 to z=-22
   const stonePositions = [
-    { x: 0, y: 1.5, z: 0 },      // Stone 1: at cave entrance
-    { x: 0, y: 1.5, z: -7 },     // Stone 2
-    { x: 0, y: 1.5, z: -14 },    // Stone 3
-    { x: 0, y: 1.5, z: -21 }     // Stone 4: at cave end
+    { x: 0, y: 1.5, z: 0 },
+    { x: 0, y: 1.5, z: -7 },
+    { x: 0, y: 1.5, z: -14 },
+    { x: 0, y: 1.5, z: -21 }
   ];
 
-  // Stones visible whenever cave is rendering
+  // Stones visible whenever scene is rendering
   $: stonesVisible = true;
-
-  // Crystal cluster positions (decorative) - on the sides of the cave
-  const crystalClusters = [
-    { x: -6, z: 3, count: 4, scale: 0.7 },
-    { x: 6, z: 1, count: 3, scale: 0.6 },
-    { x: -5, z: -3, count: 5, scale: 0.8 },
-    { x: 7, z: -7, count: 3, scale: 0.5 },
-    { x: -7, z: -11, count: 4, scale: 0.7 },
-    { x: 5, z: -14, count: 3, scale: 0.8 },
-    { x: -6, z: -18, count: 5, scale: 0.6 },
-    { x: 6, z: -21, count: 4, scale: 0.7 },
-  ];
-
-  function generateCrystals(cluster) {
-    const crystals = [];
-    for (let i = 0; i < cluster.count; i++) {
-      const angle = (i / cluster.count) * Math.PI * 2 + Math.random() * 0.5;
-      const radius = 0.3 + Math.random() * 0.5;
-      crystals.push({
-        x: cluster.x + Math.cos(angle) * radius,
-        z: cluster.z + Math.sin(angle) * radius,
-        height: 0.5 + Math.random() * 1.0 * cluster.scale,
-        rotation: Math.random() * 0.3 - 0.15,
-        scale: 0.1 + Math.random() * 0.12
-      });
-    }
-    return crystals;
-  }
-
-  const allCrystals = crystalClusters.flatMap(generateCrystals);
 
   // Stone hover states
   let hoveredStone = -1;
@@ -87,7 +52,7 @@
   // Create detailed stone geometry
   function createStoneGeometry(type, size = 2.0) {
     let geometry;
-    
+
     switch(type) {
       case 'dodecahedron':
         geometry = new THREE.DodecahedronGeometry(size, 2);
@@ -104,36 +69,35 @@
       default:
         geometry = new THREE.DodecahedronGeometry(size, 2);
     }
-    
+
     // Apply organic displacement
     const positions = geometry.attributes.position;
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i);
       const y = positions.getY(i);
       const z = positions.getZ(i);
-      
-      // Multi-frequency noise for organic look
+
       const noise1 = Math.sin(x * 2.5) * Math.cos(y * 2.5) * Math.sin(z * 2.5) * 0.12;
       const noise2 = Math.sin(x * 5 + y * 4) * Math.cos(z * 3) * 0.06;
       const noise3 = Math.sin(x * 8) * Math.sin(y * 8) * Math.sin(z * 8) * 0.03;
-      
+
       const factor = 1 + noise1 + noise2 + noise3;
-      
+
       positions.setX(i, x * factor);
       positions.setY(i, y * factor);
       positions.setZ(i, z * factor);
     }
-    
+
     positions.needsUpdate = true;
     geometry.computeVertexNormals();
-    
+
     return geometry;
   }
 
   // Pre-create geometries immediately
   let stoneGeometries = {};
   let geometriesReady = false;
-  
+
   onMount(() => {
     stones.forEach((stone, i) => {
       stoneGeometries[i] = createStoneGeometry(stone.geometry);
@@ -174,94 +138,19 @@
     const now = new Date();
     return `${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${now.getFullYear()}`;
   }
-
-  // Check if stone should be visible based on camera position and transition state
-  // Camera travels from z=4 to z=-24 during cave depth progress (28 units)
-  function getStoneVisibility(index) {
-    // Don't show stones if we're not in the cave
-    if (!stonesVisible) return false;
-    
-    // Always show all stones for now (simpler, and they'll be behind/ahead of camera)
-    return true;
-  }
-  
-  // Check if stone is "centered" (camera is close to it)
-  function isStoneCentered(index) {
-    const stoneZ = stonePositions[index].z;
-    const cameraZ = 4 - caveDepthProgress * 28;
-    const distance = Math.abs(stoneZ - cameraZ);
-    return distance < 4; // Centered within 4 units
-  }
 </script>
 
-<!-- Cave floor -->
-<T.Mesh rotation.x={-Math.PI / 2} position.y={0} position.z={-10} receiveShadow>
-  <T.PlaneGeometry args={[50, 100]} />
-  <T.MeshStandardMaterial 
-    color={0x12141a}
-    roughness={0.95}
+<!-- Flat platform floor -->
+<T.Mesh rotation.x={-Math.PI / 2} position.y={-0.5} position.z={-10} receiveShadow>
+  <T.PlaneGeometry args={[80, 120]} />
+  <T.MeshStandardMaterial
+    color={0x8a8a8a}
+    roughness={0.85}
     metalness={0.05}
     transparent
     opacity={opacity}
   />
 </T.Mesh>
-
-<!-- Cave ceiling -->
-<T.Mesh rotation.x={Math.PI / 2} position.y={14} position.z={-10}>
-  <T.PlaneGeometry args={[50, 100]} />
-  <T.MeshStandardMaterial 
-    color={0x08090c}
-    roughness={1}
-    transparent
-    opacity={opacity * 0.9}
-  />
-</T.Mesh>
-
-<!-- Stalactites -->
-{#each Array(50) as _, i}
-  {@const x = (Math.random() - 0.5) * 24}
-  {@const z = 8 - Math.random() * 38}
-  {@const height = 1.2 + Math.random() * 2.5}
-  <T.Mesh position={[x, 12, z]}>
-    <T.ConeGeometry args={[0.15 + Math.random() * 0.25, height, 5]} />
-    <T.MeshStandardMaterial 
-      color={0x1a1c22}
-      roughness={0.85}
-      transparent
-      opacity={opacity * 0.8}
-    />
-  </T.Mesh>
-{/each}
-
-<!-- Crystal formations (decorative) -->
-{#each allCrystals as crystal, i}
-  <T.Group position={[crystal.x, 0, crystal.z]}>
-    <T.Mesh 
-      position.y={crystal.height / 2}
-      rotation.x={crystal.rotation}
-      rotation.z={crystal.rotation * 0.5}
-    >
-      <T.ConeGeometry args={[crystal.scale, crystal.height, 4]} />
-      <T.MeshStandardMaterial 
-        color={0x4de8ff}
-        roughness={0.12}
-        metalness={0.92}
-        transparent
-        opacity={opacity * 0.7}
-        emissive={0x4de8ff}
-        emissiveIntensity={0.25}
-      />
-    </T.Mesh>
-  </T.Group>
-{/each}
-
-<!-- DEBUG: Remove these test spheres after fixing -->
-<!-- 
-<T.Mesh position={[0, 3, 0]}>
-  <T.SphereGeometry args={[1.5, 16, 16]} />
-  <T.MeshStandardMaterial color={0xff0000} />
-</T.Mesh>
--->
 
 <!-- Main clickable stones with labels -->
 {#each stones as stone, index}
@@ -270,19 +159,18 @@
   {@const floatY = Math.sin(time * 0.4 + index * 1.5) * 0.06}
   {@const rotY = time * 0.12 + index * Math.PI * 0.5}
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
-  
-  <!-- Only show stone when we're in its section or adjacent travel sections -->
-  <!-- Stone 0: sections 3,4 | Stone 1: sections 4,5,6 | Stone 2: sections 6,7,8 | Stone 3: sections 8,9,10 -->
+
+  <!-- Stone visibility based on section -->
   {@const stoneVisible = (
     (index === 0 && currentSection >= 3 && currentSection <= 4) ||
     (index === 1 && currentSection >= 4 && currentSection <= 6) ||
     (index === 2 && currentSection >= 6 && currentSection <= 8) ||
     (index === 3 && currentSection >= 8 && currentSection <= 10)
   )}
-  
+
   {#if stoneVisible}
     <T.Group position={[pos.x, pos.y + floatY, pos.z]}>
-    
+
     <!-- Main rock mesh - loaded GLTF model -->
     {#if $rockGltf}
       <T.Group
@@ -301,7 +189,7 @@
               castShadow
               receiveShadow
             >
-              <T.MeshStandardMaterial 
+              <T.MeshStandardMaterial
                 map={node.material.map}
                 roughnessMap={node.material.roughnessMap}
                 metalnessMap={node.material.metalnessMap}
@@ -314,7 +202,7 @@
           {/if}
         {/each}
       </T.Group>
-      
+
       <!-- Dedicated spotlight for this rock -->
       <T.SpotLight
         position={[0, 4, 2]}
@@ -339,7 +227,7 @@
         receiveShadow
       >
         <T.IcosahedronGeometry args={[1, 2]} />
-        <T.MeshStandardMaterial 
+        <T.MeshStandardMaterial
           color={stone.color}
           roughness={0.3}
           metalness={0.7}
@@ -348,22 +236,22 @@
         />
       </T.Mesh>
     {/if}
-      
+
       <!-- Subtle inner glow -->
       <T.Mesh scale={0.6} rotation.y={rotY} rotation.x={rotX}>
         <T.SphereGeometry args={[2.0, 16, 16]} />
-        <T.MeshBasicMaterial 
-          color={0x3a4a5a}
+        <T.MeshBasicMaterial
+          color={0x5a6a7a}
           transparent
           opacity={0.08 * opacity}
         />
       </T.Mesh>
-      
+
       <!-- Outer atmosphere glow -->
       <T.Mesh scale={isHovered ? 1.3 : 1.2}>
         <T.SphereGeometry args={[2.4, 32, 32]} />
-        <T.MeshBasicMaterial 
-          color={isHovered ? 0x7a8a9a : 0x4a5a6a}
+        <T.MeshBasicMaterial
+          color={isHovered ? 0x9aaaaa : 0x6a7a8a}
           transparent
           opacity={(isHovered ? 0.08 : 0.03) * opacity}
           side={THREE.BackSide}
@@ -372,7 +260,7 @@
 
       <!-- Stone lighting -->
       <T.PointLight
-        color={0xd0d8e8}
+        color={0xf0f0f0}
         intensity={isHovered ? 2.5 : 1}
         distance={10}
         decay={2}
@@ -465,43 +353,6 @@
     </T.Group>
   {/if}
 {/each}
-
-<!-- Ground rocks -->
-{#each Array(25) as _, i}
-  {@const x = (Math.random() - 0.5) * 16}
-  {@const z = 6 - Math.random() * 34}
-  {@const scale = 0.2 + Math.random() * 0.35}
-  <T.Mesh position={[x, scale * 0.2, z]} rotation.y={Math.random() * Math.PI}>
-    <T.DodecahedronGeometry args={[scale, 0]} />
-    <T.MeshStandardMaterial 
-      color={0x252830}
-      roughness={0.9}
-      transparent
-      opacity={opacity * 0.8}
-    />
-  </T.Mesh>
-{/each}
-
-<!-- Ambient particles -->
-<T.Points>
-  <T.BufferGeometry>
-    <T.BufferAttribute
-      attach="attributes-position"
-      args={[new Float32Array(Array(350).fill(0).flatMap(() => [
-        (Math.random() - 0.5) * 28,
-        Math.random() * 12,
-        8 - Math.random() * 40
-      ])), 3]}
-    />
-  </T.BufferGeometry>
-  <T.PointsMaterial
-    color={0x4de8ff}
-    size={0.035}
-    transparent
-    opacity={0.45 * opacity}
-    blending={THREE.AdditiveBlending}
-  />
-</T.Points>
 
 <style>
   :global(.stone-label-container) {

@@ -129,12 +129,12 @@
   });
 
   // =====================
-  // BACKGROUND & FOG COLORS
+  // BACKGROUND & FOG COLORS (ash gray theme)
   // =====================
   const iglooSkyColor = { r: 180, g: 195, b: 215 };
-  const caveSkyColor = { r: 15, g: 18, b: 25 };
+  const platformSkyColor = { r: 180, g: 180, b: 180 };  // Ash gray
   const iglooFogColor = { r: 160, g: 175, b: 195 };
-  const caveFogColor = { r: 20, g: 25, b: 35 };
+  const platformFogColor = { r: 170, g: 170, b: 170 };  // Ash gray fog
   
   function lerpColor(c1, c2, t) {
     return {
@@ -144,14 +144,14 @@
     };
   }
   
-  $: bgColorObj = lerpColor(iglooSkyColor, caveSkyColor, smoothTransition);
+  $: bgColorObj = lerpColor(iglooSkyColor, platformSkyColor, smoothTransition);
   $: bgColor = `rgb(${bgColorObj.r}, ${bgColorObj.g}, ${bgColorObj.b})`;
-  
-  $: fogColorObj = lerpColor(iglooFogColor, caveFogColor, smoothTransition);
+
+  $: fogColorObj = lerpColor(iglooFogColor, platformFogColor, smoothTransition);
   $: fogColor = `rgb(${fogColorObj.r}, ${fogColorObj.g}, ${fogColorObj.b})`;
-  
-  $: fogNear = lerp(35, 5, smoothTransition);
-  $: fogFar = lerp(150, 40, smoothTransition);
+
+  $: fogNear = lerp(35, 25, smoothTransition);
+  $: fogFar = lerp(150, 100, smoothTransition);
 
   function handleStoneClick(event) {
     dispatch('stoneClick', event.detail);
@@ -183,21 +183,19 @@
 {/if}
 
 <!-- ===================== -->
-<!-- CAVE SCENE LIGHTING  -->
+<!-- PLATFORM SCENE LIGHTING  -->
 <!-- ===================== -->
 {#if caveVisible}
-  <T.AmbientLight intensity={0.15 * caveOpacity} color={0x2a3a4a} />
-  
-  <!-- Cyan crystal lights along cave path -->
-  <T.PointLight position={[-3, 3, -5 - caveDepthProgress * 10]} intensity={2 * caveOpacity} color={0x4de8ff} distance={15} decay={2} />
-  <T.PointLight position={[4, 2, -8 - caveDepthProgress * 8]} intensity={1.5 * caveOpacity} color={0x66e5ff} distance={12} decay={2} />
-  <T.PointLight position={[-2, 4, -15 - caveDepthProgress * 5]} intensity={1.2 * caveOpacity} color={0x4de8ff} distance={15} decay={2} />
-  
-  <!-- Deep purple glow -->
-  <T.PointLight position={[0, 5, -20 - caveDepthProgress * 5]} intensity={1.5 * caveOpacity} color={0x8866ff} distance={20} decay={2} />
-  
-  <!-- Subtle rim light -->
-  <T.DirectionalLight position={[0, 4, -15]} intensity={0.3 * caveOpacity} color={0x4488aa} />
+  <T.AmbientLight intensity={0.6 * caveOpacity} color={0xb0b0b0} />
+
+  <!-- Main directional light -->
+  <T.DirectionalLight position={[5, 10, 5]} intensity={1.5 * caveOpacity} color={0xffffff} castShadow />
+  <T.DirectionalLight position={[-5, 8, -5]} intensity={0.8 * caveOpacity} color={0xe8e8e8} />
+
+  <!-- Soft fill lights along the path -->
+  <T.PointLight position={[0, 5, 0]} intensity={1.2 * caveOpacity} color={0xffffff} distance={20} decay={2} />
+  <T.PointLight position={[0, 5, -10]} intensity={1.0 * caveOpacity} color={0xf0f0f0} distance={20} decay={2} />
+  <T.PointLight position={[0, 5, -20]} intensity={1.0 * caveOpacity} color={0xf0f0f0} distance={20} decay={2} />
 {/if}
 
 
@@ -253,10 +251,10 @@
       />
     </T.BufferGeometry>
     <T.PointsMaterial
-      color={0x4de8ff}
+      color={0xffffff}
       size={0.06}
       transparent
-      opacity={0.6 * Math.sin(entryProgress * Math.PI)}
+      opacity={0.4 * Math.sin(entryProgress * Math.PI)}
       blending={THREE.AdditiveBlending}
     />
   </T.Points>

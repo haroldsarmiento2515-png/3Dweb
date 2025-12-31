@@ -34,9 +34,9 @@
   // Particle system properties
   $: particleIntensity = active ? Math.sin(progress * Math.PI) : 0;
   
-  // Colors
-  $: portalColor = isExiting ? 0xffffff : 0x4de8ff;
-  $: glowColor = isExiting ? 0xfff8f0 : 0x66e5ff;
+  // Colors (neutral white for ash gray theme)
+  $: portalColor = 0xffffff;
+  $: glowColor = 0xf8f8f8;
 </script>
 
 {#if active}
