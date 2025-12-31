@@ -231,15 +231,6 @@
       </div>
     </div>
 
-    <!-- Clickable stone overlay - positioned over the 3D stone -->
-    {#if isViewingStone && !modalOpen}
-      <button
-        class="stone-click-area"
-        on:click={() => handleStoneClick(currentStone)}
-        aria-label="Click to explore {currentStone?.name}"
-      >
-      </button>
-    {/if}
   {/if}
 
   <!-- Scroll Container - Simple sections: Igloo + 4 Stones -->
@@ -305,23 +296,5 @@
   .progress-dot.stone-dot {
     width: 8px;
     height: 8px;
-  }
-
-  .stone-click-area {
-    position: fixed;
-    top: 45%;
-    left: 35%;
-    transform: translate(-50%, -50%);
-    width: 320px;
-    height: 380px;
-    background: rgba(255, 255, 255, 0);
-    border: none;
-    cursor: pointer;
-    z-index: 50;
-    border-radius: 40%;
-  }
-
-  .stone-click-area:focus {
-    outline: none;
   }
 </style>
