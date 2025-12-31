@@ -24,11 +24,11 @@
   // =====================
 
   // Calculate which stone is currently active based on scroll
-  // Matches App.svelte sections: 0.20-0.40=Stone1, 0.40-0.60=Stone2, 0.60-0.80=Stone3, 0.80+=Stone4
+  // Matches App.svelte sections: 0.10-0.35=Stone1, 0.35-0.60=Stone2, 0.60-0.85=Stone3, 0.85+=Stone4
   $: activeStoneIndex = (() => {
-    if (scrollProgress < 0.40) return 0;
+    if (scrollProgress < 0.35) return 0;
     if (scrollProgress < 0.60) return 1;
-    if (scrollProgress < 0.80) return 2;
+    if (scrollProgress < 0.85) return 2;
     return 3;
   })();
 
