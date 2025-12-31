@@ -1,11 +1,11 @@
 <script>
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
-  import { fly, scale, fade } from 'svelte/transition';
-  import { cubicOut, backOut } from 'svelte/easing';
+  import { fly, fade } from 'svelte/transition';
+  import { cubicOut } from 'svelte/easing';
 
   export let stone;
   export let stoneIndex = 0;
-  export let showContent = false; // Controlled by parent for sequenced animation
+  export let showContent = false;
 
   const dispatch = createEventDispatcher();
 
@@ -35,12 +35,11 @@
   onDestroy(() => {
     window.removeEventListener('keydown', handleKeydown);
   });
-
-  $: specimenNumber = String(stoneIndex + 1).padStart(2, '0');
 </script>
 
 <div
   class="modal-backdrop"
+  class:visible={showContent}
   on:click={handleBackdropClick}
   on:keydown={handleKeydown}
   role="button"
@@ -48,82 +47,59 @@
   aria-label="Close modal"
 >
   {#if showContent}
+    <!-- Close button -->
+    <button
+      class="close-btn"
+      on:click={handleClose}
+      aria-label="Close"
+      in:fade={{ duration: 300, delay: 300 }}
+    >
+      <span class="bracket-corner top-left"></span>
+      <span class="bracket-corner top-right"></span>
+      <span class="close-text">Close</span>
+      <span class="bracket-corner bottom-left"></span>
+      <span class="bracket-corner bottom-right"></span>
+    </button>
+
+    <!-- Content panel on the right side -->
     <div
       bind:this={contentRef}
       class="modal-content"
       tabindex="-1"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
-      in:fly={{ y: 40, duration: 500, delay: 200, easing: cubicOut }}
-      out:fly={{ y: 20, duration: 250, easing: cubicOut }}
+      in:fly={{ x: 30, duration: 400, delay: 100, easing: cubicOut }}
+      out:fly={{ x: 20, duration: 200, easing: cubicOut }}
     >
-      <!-- Close button with bracket decoration -->
-      <button
-        class="close-btn"
-        on:click={handleClose}
-        aria-label="Close"
-        in:fade={{ duration: 300, delay: 400 }}
-      >
-        <span class="bracket-corner top-left"></span>
-        <span class="bracket-corner top-right"></span>
-        <span class="close-text">Close</span>
-        <span class="bracket-corner bottom-left"></span>
-        <span class="bracket-corner bottom-right"></span>
-      </button>
-
       <!-- Section: Summary -->
-      <section class="content-section" in:fly={{ y: 20, duration: 400, delay: 300 }}>
+      <section class="content-section">
         <h2 class="section-header">////// Summary</h2>
 
         <p class="description">
-          {stone.name}, a creative venture founded in 2021, quickly
-          gained attention for its unique IP and engaging community.
-          In 2022, the company was acquired by Igloo Inc., a strategic
-          move aimed at expanding its reach and capabilities. The
-          acquisition by Igloo Inc. was part of a broader vision to
-          transform and reposition {stone.name} as a next-generation
-          entertainment company and the face of Web3 worldwide.
+          Introducing Abstract, the blockchain for consumer crypto, pioneering culture, community, and creativity onchain. We believe that consumer crypto is the breakthrough opportunity to bring billions of people onchain and the final frontier for consumer crypto adoption. The dominant consumer crypto chain will be the single greatest distribution channel-bringing users, liquidity, partnerships, and community to crypto-native builders and global brands.
         </p>
 
         <p class="description">
-          We believe in a future where intellectual property, digital
-          collectibles, and communities are born and thrive on the
-          blockchain. Since our acquisition, {stone.name} has
-          leveraged its onchain origins to create a new model for
-          consumer brands, shifting from a brand-and-consumer approach
-          to a brand-and-participant model. Our business strategy
-          focuses on expanding a vast range of content mediums,
-          products, and experiences, driving people onchain into the
-          new era of the internet. By harnessing the power of our
-          vibrant community and the rich and whimsical universe of
-          {stone.name}, we're revolutionizing the way IP is created
-          and experienced.
+          Through a combination of culture & community building, a brand-new economic mechanism, cutting-edge cryptography, and dedicated builder & brand support, Abstract allows those building for the masses to scale and flourish.
         </p>
       </section>
 
       <!-- Section: Discover -->
-      <section class="content-section" in:fly={{ y: 20, duration: 400, delay: 400 }}>
+      <section class="content-section">
         <h3 class="section-header">/// Discover</h3>
 
         <div class="links-row">
           <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="link-btn">
             [X] ↗
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="link-btn">
-            [IG] ↗
-          </a>
           <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="link-btn">
             [LI] ↗
-          </a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="link-btn">
-            [TK] ↗
           </a>
         </div>
       </section>
 
       <!-- Section: Visit -->
-      <section class="content-section" in:fly={{ y: 20, duration: 400, delay: 500 }}>
+      <section class="content-section">
         <h3 class="section-header">/// Visit</h3>
 
         <a href="#" target="_blank" rel="noopener noreferrer" class="link-btn">
@@ -140,27 +116,46 @@
     inset: 0;
     z-index: 100;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 0;
     background: transparent;
-    overflow-y: auto;
+    transition: background 0.4s ease;
+  }
+
+  .modal-backdrop.visible {
+    background: linear-gradient(
+      to right,
+      rgba(10, 15, 25, 0.85) 0%,
+      rgba(10, 15, 25, 0.6) 40%,
+      rgba(10, 15, 25, 0.2) 70%,
+      transparent 100%
+    );
   }
 
   .modal-content {
-    position: relative;
-    max-width: 580px;
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 520px;
     width: 100%;
-    padding: 2rem;
-    text-align: center;
-    max-height: 85vh;
+    padding: 2rem 3rem;
+    text-align: left;
+    max-height: 80vh;
     overflow-y: auto;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .modal-content::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
   }
 
   .close-btn {
     position: fixed;
-    top: 3rem;
-    right: 4rem;
+    top: 2.5rem;
+    right: 3rem;
     background: transparent;
     border: none;
     color: rgba(216, 218, 223, 0.9);
@@ -176,6 +171,7 @@
     align-items: center;
     justify-items: center;
     transition: color 0.2s ease;
+    z-index: 110;
   }
 
   .close-btn:hover {
@@ -226,35 +222,29 @@
   }
 
   .content-section {
-    margin-bottom: 2.5rem;
-    text-align: left;
+    margin-bottom: 2rem;
   }
 
   .section-header {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 400;
-    letter-spacing: 0.05em;
-    color: rgba(168, 173, 184, 0.6);
-    margin-bottom: 1.25rem;
+    letter-spacing: 0.08em;
+    color: rgba(168, 173, 184, 0.5);
+    margin-bottom: 1rem;
   }
 
   .description {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    line-height: 1.85;
+    font-size: 0.85rem;
+    line-height: 1.8;
     color: rgba(216, 218, 223, 0.85);
-    letter-spacing: 0.02em;
-    margin-bottom: 1.5rem;
+    letter-spacing: 0.01em;
+    margin-bottom: 1.25rem;
   }
 
   .description:last-child {
     margin-bottom: 0;
-  }
-
-  .description :global(strong) {
-    color: rgba(245, 245, 247, 1);
-    font-weight: 600;
   }
 
   .links-row {
@@ -268,7 +258,7 @@
     border: none;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
-    color: rgba(216, 218, 223, 0.75);
+    color: rgba(216, 218, 223, 0.7);
     cursor: pointer;
     padding: 0;
     letter-spacing: 0.02em;
@@ -280,13 +270,18 @@
     color: rgba(245, 245, 247, 1);
   }
 
-  @media (max-width: 1024px) {
-    .modal-backdrop {
-      padding: 2rem;
-    }
-
+  @media (max-width: 1200px) {
     .modal-content {
-      max-width: 100%;
+      right: 45%;
+      max-width: 480px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .modal-content {
+      right: 40%;
+      max-width: 450px;
+      padding: 2rem;
     }
 
     .close-btn {
@@ -296,13 +291,26 @@
   }
 
   @media (max-width: 768px) {
-    .modal-backdrop {
-      padding: 1.5rem;
+    .modal-backdrop.visible {
+      background: linear-gradient(
+        to bottom,
+        rgba(10, 15, 25, 0.9) 0%,
+        rgba(10, 15, 25, 0.7) 50%,
+        rgba(10, 15, 25, 0.4) 100%
+      );
     }
 
     .modal-content {
-      padding: 1.5rem;
-      padding-top: 4rem;
+      right: auto;
+      left: 0;
+      top: auto;
+      bottom: 0;
+      transform: none;
+      max-width: 100%;
+      width: 100%;
+      max-height: 60vh;
+      padding: 2rem 1.5rem;
+      padding-bottom: 3rem;
     }
 
     .close-btn {
@@ -311,8 +319,8 @@
     }
 
     .description {
-      font-size: 0.82rem;
-      line-height: 1.75;
+      font-size: 0.8rem;
+      line-height: 1.7;
     }
   }
 </style>
