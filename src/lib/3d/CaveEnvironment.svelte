@@ -172,27 +172,15 @@
         rotation.z={index * 0.3}
         scale={finalScale}
       >
-        <!-- Clickable hitbox for reliable click detection -->
-        <T.Mesh
-          on:click={() => handleStoneClick(stone, index)}
-          on:pointerenter={() => handleStoneEnter(index)}
-          on:pointerleave={handleStoneLeave}
-        >
-          <T.SphereGeometry args={[1.3, 32, 32]} />
-          <T.MeshBasicMaterial
-            transparent
-            opacity={0.01}
-            depthWrite={false}
-            side={2}
-          />
-        </T.Mesh>
-
         {#each Object.values($rockGltf.nodes) as node}
           {#if node.isMesh}
             <T.Mesh
               geometry={node.geometry}
               castShadow
               receiveShadow
+              on:click={() => handleStoneClick(stone, index)}
+              on:pointerenter={() => handleStoneEnter(index)}
+              on:pointerleave={handleStoneLeave}
             >
               <T.MeshStandardMaterial
                 map={node.material.map}
