@@ -266,87 +266,41 @@
         decay={2}
       />
 
-      <!-- HTML Labels - Top Left -->
+      <!-- HTML Labels - Left Side Info Panel (faces screen directly) -->
       <HTML
-        position={[-3, 2.2, 0]}
-        transform
+        position={[-4.5, 0, 0]}
+        center
         occlude={false}
         style="pointer-events: none;"
       >
-        <div class="stone-label-container top-left" class:hovered={isHovered}>
-          <svg class="connector-line" width="60" height="40" viewBox="0 0 60 40">
-            <line x1="0" y1="40" x2="50" y2="10" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-            <circle cx="50" cy="10" r="2" fill="currentColor" opacity="0.6"/>
-          </svg>
-          <div class="label-text">
-            <span class="label-id">PORTFOLIO_CO_{String(index + 1).padStart(2, '0')}</span>
-            <span class="label-name">{stone.name.toUpperCase().replace(' ', '_')}</span>
+        <div class="info-panel left-panel" class:hovered={isHovered}>
+          <div class="info-header">
+            <span class="info-id">PORTFOLIO_CO_{String(index + 1).padStart(2, '0')}</span>
           </div>
+          <div class="info-name">{stone.name.toUpperCase().replace(' ', '_')}</div>
+          <div class="info-divider"></div>
+          <div class="info-date">D {formatDate()}</div>
         </div>
       </HTML>
 
-      <!-- HTML Labels - Right Side (TEMP data) -->
+      <!-- HTML Labels - Right Side Info Panel (faces screen directly) -->
       <HTML
-        position={[3.5, 0.8, 0]}
-        transform
+        position={[4.5, 0, 0]}
+        center
         occlude={false}
         style="pointer-events: none;"
       >
-        <div class="stone-label-container right-data" class:hovered={isHovered}>
-          <div class="data-block">
-            <span class="data-label">TEMP</span>
-            <span class="data-value">{(25 + Math.sin(index * 2) * 8).toFixed(2)}</span>
-            <span class="data-value secondary">{(-3 + Math.cos(index * 2) * 4).toFixed(2)}</span>
+        <div class="info-panel right-panel" class:hovered={isHovered}>
+          <div class="info-row">
+            <span class="info-label">TEMP</span>
+            <span class="info-value">{(25 + Math.sin(index * 2) * 8).toFixed(2)}</span>
           </div>
-        </div>
-      </HTML>
-
-      <!-- HTML Labels - Bottom Right -->
-      <HTML
-        position={[2.5, -1.8, 0]}
-        transform
-        occlude={false}
-        style="pointer-events: none;"
-      >
-        <div class="stone-label-container bottom-right" class:hovered={isHovered}>
-          <svg class="connector-line bottom" width="50" height="35" viewBox="0 0 50 35">
-            <line x1="50" y1="0" x2="10" y2="25" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-            <circle cx="10" cy="25" r="2" fill="currentColor" opacity="0.6"/>
-          </svg>
-          <div class="label-text bottom">
-            <span class="label-date">D {formatDate()}</span>
-            <span class="label-action">CLICK TO EXPLORE</span>
+          <div class="info-row">
+            <span class="info-label"></span>
+            <span class="info-value secondary">+{(-3 + Math.cos(index * 2) * 4).toFixed(2)}</span>
           </div>
-        </div>
-      </HTML>
-
-      <!-- Corner bracket - Top Right -->
-      <HTML
-        position={[2.8, 2, 0]}
-        transform
-        occlude={false}
-        style="pointer-events: none;"
-      >
-        <div class="corner-bracket tr" class:hovered={isHovered}>
-          <svg width="30" height="30" viewBox="0 0 30 30">
-            <path d="M0 8 L0 0 L8 0" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
-            <path d="M22 0 L30 0 L30 8" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
-          </svg>
-        </div>
-      </HTML>
-
-      <!-- Corner bracket - Bottom Left -->
-      <HTML
-        position={[-2.8, -1.5, 0]}
-        transform
-        occlude={false}
-        style="pointer-events: none;"
-      >
-        <div class="corner-bracket bl" class:hovered={isHovered}>
-          <svg width="30" height="30" viewBox="0 0 30 30">
-            <path d="M0 22 L0 30 L8 30" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
-            <path d="M22 30 L30 30 L30 22" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
-          </svg>
+          <div class="info-divider"></div>
+          <div class="info-action">CLICK TO EXPLORE</div>
         </div>
       </HTML>
 
@@ -355,121 +309,112 @@
 {/each}
 
 <style>
-  :global(.stone-label-container) {
+  /* Info Panel - Clean flat layout facing screen */
+  :global(.info-panel) {
     font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-    color: rgba(255, 255, 255, 0.75);
-    transition: all 0.3s ease;
-  }
-
-  :global(.stone-label-container.hovered) {
-    color: rgba(255, 255, 255, 0.95);
-  }
-
-  :global(.stone-label-container.top-left) {
-    position: relative;
-  }
-
-  :global(.stone-label-container.top-left .connector-line) {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  :global(.stone-label-container.hovered .connector-line) {
     color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    min-width: 140px;
   }
 
-  :global(.stone-label-container.bottom-right) {
-    position: relative;
+  :global(.info-panel.hovered) {
+    color: rgba(255, 255, 255, 1);
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
-  :global(.stone-label-container.bottom-right .connector-line.bottom) {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    color: rgba(255, 255, 255, 0.5);
+  :global(.info-panel.left-panel) {
+    text-align: left;
   }
 
-  :global(.label-text) {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  :global(.label-text.bottom) {
-    align-items: flex-end;
+  :global(.info-panel.right-panel) {
     text-align: right;
   }
 
-  :global(.label-id) {
+  :global(.info-header) {
+    margin-bottom: 4px;
+  }
+
+  :global(.info-id) {
     font-size: 9px;
     letter-spacing: 0.12em;
     color: rgba(255, 255, 255, 0.5);
   }
 
-  :global(.label-name) {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.85);
+  :global(.info-panel.hovered .info-id) {
+    color: rgba(255, 255, 255, 0.7);
   }
 
-  :global(.stone-label-container.hovered .label-name) {
+  :global(.info-name) {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 8px;
+  }
+
+  :global(.info-panel.hovered .info-name) {
     color: rgba(255, 255, 255, 1);
   }
 
-  :global(.data-block) {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1px;
+  :global(.info-divider) {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 8px 0;
   }
 
-  :global(.data-label) {
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    color: rgba(255, 255, 255, 0.45);
+  :global(.info-panel.hovered .info-divider) {
+    background: rgba(255, 255, 255, 0.35);
   }
 
-  :global(.data-value) {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  :global(.data-value.secondary) {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.55);
-  }
-
-  :global(.label-date) {
-    font-size: 9px;
+  :global(.info-date) {
+    font-size: 10px;
     letter-spacing: 0.1em;
     color: rgba(255, 255, 255, 0.5);
   }
 
-  :global(.label-action) {
+  :global(.info-row) {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 2px;
+  }
+
+  :global(.info-label) {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  :global(.info-value) {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  :global(.info-value.secondary) {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  :global(.info-panel.hovered .info-value) {
+    color: rgba(255, 255, 255, 1);
+  }
+
+  :global(.info-action) {
     font-size: 10px;
     letter-spacing: 0.15em;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
   }
 
-  :global(.stone-label-container.hovered .label-action) {
+  :global(.info-panel.hovered .info-action) {
     color: rgba(255, 255, 255, 0.95);
-  }
-
-  :global(.corner-bracket) {
-    color: rgba(255, 255, 255, 0.4);
-    transition: color 0.3s ease;
-  }
-
-  :global(.corner-bracket.hovered) {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  :global(.right-data) {
-    text-align: right;
   }
 </style>
