@@ -8,7 +8,12 @@
   import CaveEnvironment from './CaveEnvironment.svelte';
 
   // Enable interactivity - must be called inside a Canvas child component
-  interactivity();
+  interactivity({
+    filter: (hits) => {
+      // Return all hits to ensure click detection works
+      return hits;
+    }
+  });
 
   export let scrollProgress = 0;
   export let currentSection = 0;

@@ -112,17 +112,20 @@
   });
 
   function handleStoneClick(stone, index) {
+    console.log('Stone clicked!', stone.name, index);
     if (!modalOpen) {
       dispatch('stoneClick', stone);
     }
   }
 
   function handleStoneEnter(index) {
+    console.log('Stone hover enter', index);
     hoveredStone = index;
     document.body.style.cursor = 'pointer';
   }
 
   function handleStoneLeave() {
+    console.log('Stone hover leave');
     hoveredStone = -1;
     document.body.style.cursor = 'default';
   }
@@ -169,14 +172,19 @@
         rotation.z={index * 0.3}
         scale={finalScale}
       >
-        <!-- Invisible hitbox for reliable click detection -->
+        <!-- Clickable hitbox for reliable click detection -->
         <T.Mesh
           on:click={() => handleStoneClick(stone, index)}
           on:pointerenter={() => handleStoneEnter(index)}
           on:pointerleave={handleStoneLeave}
         >
-          <T.SphereGeometry args={[1.2, 16, 16]} />
-          <T.MeshBasicMaterial transparent opacity={0} depthWrite={false} />
+          <T.SphereGeometry args={[1.3, 32, 32]} />
+          <T.MeshBasicMaterial
+            transparent
+            opacity={0.01}
+            depthWrite={false}
+            side={2}
+          />
         </T.Mesh>
 
         {#each Object.values($rockGltf.nodes) as node}

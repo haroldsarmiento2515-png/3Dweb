@@ -70,4 +70,8 @@
     inset: 0;
     background: #0a0c10;
   }
+
+  .scene-container :global(canvas) {
+    pointer-events: auto !important;
+  }
 </style>
