@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLACIAL — Particle Morphing Experience</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #e8e8e8;
+      --secondary: #666666;
+      --accent: #ffffff;
+      --bg: #0a0a0a;
+      --hud-color: rgba(255, 255, 255, 0.4);
+      --hud-accent: rgba(255, 255, 255, 0.8);
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      background: var(--bg);
+      color: var(--primary);
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* Scroll Container */
+    .scroll-container {
+      height: 600vh;
+      position: relative;
+    }
+
+    /* Three.js Canvas */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    /* HUD Overlay System */
+    .hud-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Corner Brackets */
+    .corner-bracket {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--hud-color);
+    }
+
+    .corner-bracket.tl {
+      top: 30px;
+      left: 30px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner-bracket.tr {
+      top: 30px;
+      right: 30px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner-bracket.bl {
+      bottom: 30px;
+      left: 30px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .corner-bracket.br {
+      bottom: 30px;
+      right: 30px;
+      border-left: none;
+      border-top: none;
+    }
+
+    /* Header HUD */
+    .hud-header {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .hud-header h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 8px;
+      color: var(--hud-color);
+      text-transform: uppercase;
+    }
+
+    /* Left Panel */
+    .hud-left {
+      position: absolute;
+      left: 50px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .data-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .data-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--hud-color);
+      text-transform: uppercase;
+    }
+
+    .data-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--hud-accent);
+    }
+
+    .data-bar {
+      width: 100px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .data-bar-fill {
+      height: 100%;
+      background: var(--hud-accent);
+      transition: width 0.3s ease;
+    }
+
+    /* Right Panel */
+    .hud-right {
+      position: absolute;
+      right: 50px;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: right;
+    }
+
+    .morph-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stage-item {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      opacity: 0.3;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .stage-item.active {
+      opacity: 1;
+      transform: translateX(-10px);
+    }
+
+    .stage-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .stage-indicator {
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--hud-color);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .stage-item.active .stage-indicator {
+      background: var(--hud-accent);
+      border-color: var(--hud-accent);
+    }
+
+    /* Bottom HUD */
+    .hud-bottom {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--hud-color), transparent);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-dot {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--hud-accent);
+      border-radius: 50%;
+      left: -1px;
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { top: 0; opacity: 0; }
+      50% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .scroll-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--hud-color);
+      text-transform: uppercase;
+    }
+
+    /* Phase Titles - Centered Large Text */
+    .phase-title {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+    }
+
+    .phase-title.visible {
+      opacity: 1;
+    }
+
+    .phase-title h2 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(40px, 8vw, 100px);
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.08);
+      letter-spacing: -2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .phase-title .subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--hud-color);
+      text-transform: uppercase;
+      margin-top: 20px;
+    }
+
+    /* Crosshair cursor custom */
+    .crosshair {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      z-index: 1000;
+      mix-blend-mode: difference;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: '';
+      position: absolute;
+      background: white;
+    }
+
+    .crosshair::before {
+      width: 1px;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .crosshair::after {
+      width: 100%;
+      height: 1px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Vignette */
+    .vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+      z-index: 10;
+    }
+
+    /* Scan lines */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      z-index: 11;
+    }
+
+    /* Noise texture */
+    .noise {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.015;
+      z-index: 12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Loading Screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: var(--hud-color);
+      text-transform: uppercase;
+    }
+
+    .loading-bar {
+      width: 200px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .loading-progress {
+      height: 100%;
+      background: var(--hud-accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Coordinate display */
+    .coordinates {
+      position: absolute;
+      bottom: 80px;
+      left: 50px;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--hud-color);
+      letter-spacing: 1px;
+    }
+
+    .coord-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 4px;
+    }
+
+    /* Frame counter */
+    .frame-counter {
+      position: absolute;
+      top: 80px;
+      right: 50px;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--hud-color);
+      text-align: right;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hud-left, .hud-right {
+        display: none;
+      }
+      
+      .corner-bracket {
+        width: 25px;
+        height: 25px;
+      }
+      
+      .corner-bracket.tl, .corner-bracket.tr,
+      .corner-bracket.bl, .corner-bracket.br {
+        top: 15px;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+      }
+      
+      .corner-bracket.tl { top: 15px; left: 15px; }
+      .corner-bracket.tr { top: 15px; right: 15px; }
+      .corner-bracket.bl { bottom: 15px; left: 15px; }
+      .corner-bracket.br { bottom: 15px; right: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loading">
+    <div class="loading-text">Initializing Particle System</div>
+    <div class="loading-bar">
+      <div class="loading-progress" id="loading-progress"></div>
+    </div>
+    <div class="loading-text" id="loading-percent">0%</div>
+  </div>
+
+  <!-- Custom Crosshair -->
+  <div class="crosshair" id="crosshair"></div>
+
+  <!-- Three.js Canvas -->
+  <div id="canvas-container"></div>
+
+  <!-- Visual Effects -->
+  <div class="vignette"></div>
+  <div class="scanlines"></div>
+  <div class="noise"></div>
+
+  <!-- HUD Layer -->
+  <div class="hud-layer">
+    <!-- Corner Brackets -->
+    <div class="corner-bracket tl"></div>
+    <div class="corner-bracket tr"></div>
+    <div class="corner-bracket bl"></div>
+    <div class="corner-bracket br"></div>
+
+    <!-- Header -->
+    <div class="hud-header">
+      <h1>Glacial Experience</h1>
+    </div>
+
+    <!-- Left Panel - Data -->
+    <div class="hud-left">
+      <div class="data-block">
+        <span class="data-label">Particles</span>
+        <span class="data-value" id="particle-count">50,000</span>
+        <div class="data-bar">
+          <div class="data-bar-fill" style="width: 100%"></div>
+        </div>
+      </div>
+      <div class="data-block">
+        <span class="data-label">Morph Progress</span>
+        <span class="data-value" id="morph-progress">0.00</span>
+        <div class="data-bar">
+          <div class="data-bar-fill" id="morph-bar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="data-block">
+        <span class="data-label">Velocity</span>
+        <span class="data-value" id="velocity">0.00</span>
+      </div>
+    </div>
+
+    <!-- Right Panel - Morph Stages -->
+    <div class="hud-right">
+      <div class="morph-stage">
+        <div class="stage-item active" data-stage="0">
+          <span class="stage-name">Sphere</span>
+          <div class="stage-indicator"></div>
+        </div>
+        <div class="stage-item" data-stage="1">
+          <span class="stage-name">Torus</span>
+          <div class="stage-indicator"></div>
+        </div>
+        <div class="stage-item" data-stage="2">
+          <span class="stage-name">Cube</span>
+          <div class="stage-indicator"></div>
+        </div>
+        <div class="stage-item" data-stage="3">
+          <span class="stage-name">Human</span>
+          <div class="stage-indicator"></div>
+        </div>
+        <div class="stage-item" data-stage="4">
+          <span class="stage-name">Disperse</span>
+          <div class="stage-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom - Scroll Indicator -->
+    <div class="hud-bottom">
+      <div class="scroll-indicator">
+        <div class="scroll-line">
+          <div class="scroll-dot"></div>
+        </div>
+        <span class="scroll-text">Scroll to Morph</span>
+      </div>
+    </div>
+
+    <!-- Coordinates -->
+    <div class="coordinates">
+      <div class="coord-row">
+        <span>X: <span id="coord-x">0.000</span></span>
+        <span>Y: <span id="coord-y">0.000</span></span>
+        <span>Z: <span id="coord-z">0.000</span></span>
+      </div>
+    </div>
+
+    <!-- Frame Counter -->
+    <div class="frame-counter">
+      <div>FPS: <span id="fps">60</span></div>
+      <div>FRAME: <span id="frame">0</span></div>
+    </div>
+  </div>
+
+  <!-- Phase Titles -->
+  <div class="phase-title" id="phase-sphere">
+    <h2>Genesis</h2>
+    <div class="subtitle">Primary Form — Sphere</div>
+  </div>
+  <div class="phase-title" id="phase-torus">
+    <h2>Evolution</h2>
+    <div class="subtitle">Secondary Form — Torus</div>
+  </div>
+  <div class="phase-title" id="phase-cube">
+    <h2>Structure</h2>
+    <div class="subtitle">Tertiary Form — Cube</div>
+  </div>
+  <div class="phase-title" id="phase-human">
+    <h2>Emergence</h2>
+    <div class="subtitle">Quaternary Form — Human</div>
+  </div>
+  <div class="phase-title" id="phase-disperse">
+    <h2>Transcendence</h2>
+    <div class="subtitle">Final Form — Dispersion</div>
+  </div>
+
+  <!-- Scroll Container -->
+  <div class="scroll-container"></div>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <!-- Post-processing -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+
+  <script>
+    // ==========================================
+    // GLACIAL EXPERIENCE - Particle Morphing
+    // ==========================================
+
+    // Configuration
+    const CONFIG = {
+      particleCount: 50000,
+      morphDuration: 0.2,
+      cameraDistance: 5,
+      bloomStrength: 1.5,
+      bloomRadius: 0.4,
+      bloomThreshold: 0.2,
+      fogDensity: 0.15,
+      particleSize: 2.5
+    };
+
+    // Global state
+    let scene, camera, renderer, composer;
+    let particleSystem, particleMaterial;
+    let positions, targetPositions, originalPositions;
+    let scrollProgress = 0;
+    let lastScrollProgress = 0;
+    let scrollVelocity = 0;
+    let currentStage = 0;
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let fps = 60;
+    let totalFrames = 0;
+
+    // Shape generators
+    const shapes = {
+      sphere: (i, total) => {
+        const phi = Math.acos(-1 + (2 * i) / total);
+        const theta = Math.sqrt(total * Math.PI) * phi;
+        const radius = 1.5;
+        return {
+          x: radius * Math.cos(theta) * Math.sin(phi),
+          y: radius * Math.sin(theta) * Math.sin(phi),
+          z: radius * Math.cos(phi)
+        };
+      },
+
+      torus: (i, total) => {
+        const u = (i / total) * Math.PI * 2 * 32;
+        const v = (i % 100) / 100 * Math.PI * 2;
+        const R = 1.2;
+        const r = 0.4;
+        return {
+          x: (R + r * Math.cos(v)) * Math.cos(u),
+          y: (R + r * Math.cos(v)) * Math.sin(u),
+          z: r * Math.sin(v)
+        };
+      },
+
+      cube: (i, total) => {
+        const side = Math.cbrt(total);
+        const size = 2;
+        const x = ((i % side) / side - 0.5) * size;
+        const y = ((Math.floor(i / side) % side) / side - 0.5) * size;
+        const z = ((Math.floor(i / (side * side))) / side - 0.5) * size;
+        
+        const noise = 0.1;
+        return {
+          x: x + (Math.random() - 0.5) * noise,
+          y: y + (Math.random() - 0.5) * noise,
+          z: z + (Math.random() - 0.5) * noise
+        };
+      },
+
+      human: (i, total) => {
+        const t = i / total;
+        let x, y, z;
+        
+        if (t < 0.15) {
+          // Head
+          const angle = (t / 0.15) * Math.PI * 2;
+          const radius = 0.3;
+          x = Math.cos(angle) * radius * 0.8;
+          y = 1.5 + Math.sin(angle) * radius;
+          z = (Math.random() - 0.5) * 0.3;
+        } else if (t < 0.45) {
+          // Torso
+          const progress = (t - 0.15) / 0.3;
+          x = (Math.random() - 0.5) * (0.8 - progress * 0.3);
+          y = 1.2 - progress * 1.5;
+          z = (Math.random() - 0.5) * 0.4;
+        } else if (t < 0.65) {
+          // Left arm
+          const progress = (t - 0.45) / 0.2;
+          x = -0.4 - progress * 0.8;
+          y = 0.8 - progress * 0.3;
+          z = (Math.random() - 0.5) * 0.2;
+        } else if (t < 0.85) {
+          // Right arm
+          const progress = (t - 0.65) / 0.2;
+          x = 0.4 + progress * 0.8;
+          y = 0.8 - progress * 0.3;
+          z = (Math.random() - 0.5) * 0.2;
+        } else {
+          // Legs
+          const progress = (t - 0.85) / 0.15;
+          const legSide = Math.random() > 0.5 ? 1 : -1;
+          x = legSide * 0.25 + (Math.random() - 0.5) * 0.1;
+          y = -0.3 - progress * 1.2;
+          z = (Math.random() - 0.5) * 0.2;
+        }
+        
+        return { x, y, z };
+      },
+
+      disperse: (i, total) => {
+        const phi = Math.random() * Math.PI * 2;
+        const theta = Math.random() * Math.PI;
+        const radius = 2 + Math.random() * 4;
+        return {
+          x: radius * Math.sin(theta) * Math.cos(phi),
+          y: radius * Math.sin(theta) * Math.sin(phi),
+          z: radius * Math.cos(theta)
+        };
+      }
+    };
+
+    // Initialize
+    async function init() {
+      // Setup scene
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x0a0a0a, CONFIG.fogDensity);
+
+      // Setup camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.z = CONFIG.cameraDistance;
+
+      // Setup renderer
+      renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance"
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x0a0a0a);
+      document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+      // Post-processing
+      composer = new THREE.EffectComposer(renderer);
+      const renderPass = new THREE.RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      const bloomPass = new THREE.UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        CONFIG.bloomStrength,
+        CONFIG.bloomRadius,
+        CONFIG.bloomThreshold
+      );
+      composer.addPass(bloomPass);
+
+      // Create particles
+      await createParticles();
+
+      // Event listeners
+      window.addEventListener('scroll', onScroll);
+      window.addEventListener('resize', onResize);
+      window.addEventListener('mousemove', onMouseMove);
+
+      // Hide loading screen
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+      }, 1500);
+
+      // Start animation
+      animate();
+    }
+
+    // Simulate loading progress
+    function simulateLoading() {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+        }
+        document.getElementById('loading-progress').style.width = progress + '%';
+        document.getElementById('loading-percent').textContent = Math.floor(progress) + '%';
+      }, 100);
+    }
+
+    // Create particle system
+    async function createParticles() {
+      simulateLoading();
+
+      const geometry = new THREE.BufferGeometry();
+      positions = new Float32Array(CONFIG.particleCount * 3);
+      targetPositions = new Float32Array(CONFIG.particleCount * 3);
+      originalPositions = new Float32Array(CONFIG.particleCount * 3);
+      const colors = new Float32Array(CONFIG.particleCount * 3);
+      const sizes = new Float32Array(CONFIG.particleCount);
+
+      // Initialize with sphere shape
+      for (let i = 0; i < CONFIG.particleCount; i++) {
+        const pos = shapes.sphere(i, CONFIG.particleCount);
+        positions[i * 3] = pos.x;
+        positions[i * 3 + 1] = pos.y;
+        positions[i * 3 + 2] = pos.z;
+        
+        originalPositions[i * 3] = pos.x;
+        originalPositions[i * 3 + 1] = pos.y;
+        originalPositions[i * 3 + 2] = pos.z;
+
+        // Monochromatic with slight variation
+        const brightness = 0.7 + Math.random() * 0.3;
+        colors[i * 3] = brightness;
+        colors[i * 3 + 1] = brightness;
+        colors[i * 3 + 2] = brightness;
+
+        sizes[i] = CONFIG.particleSize * (0.5 + Math.random() * 0.5);
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      // Custom shader material
+      particleMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          pixelRatio: { value: renderer.getPixelRatio() },
+          morphProgress: { value: 0 }
+        },
+        vertexShader: `
+          attribute float size;
+          attribute vec3 color;
+          varying vec3 vColor;
+          varying float vAlpha;
+          uniform float time;
+          uniform float pixelRatio;
+          uniform float morphProgress;
+
+          void main() {
+            vColor = color;
+            
+            vec3 pos = position;
+            
+            // Add subtle movement
+            float noise = sin(pos.x * 2.0 + time) * cos(pos.y * 2.0 + time) * 0.02;
+            pos += noise;
+            
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            
+            // Size attenuation
+            gl_PointSize = size * pixelRatio * (300.0 / -mvPosition.z);
+            
+            // Distance-based alpha
+            float dist = length(mvPosition.xyz);
+            vAlpha = smoothstep(10.0, 2.0, dist);
+            
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vColor;
+          varying float vAlpha;
+
+          void main() {
+            // Circular point with soft edges
+            vec2 center = gl_PointCoord - vec2(0.5);
+            float dist = length(center);
+            
+            if (dist > 0.5) discard;
+            
+            float alpha = smoothstep(0.5, 0.1, dist) * vAlpha;
+            
+            // Glow effect
+            vec3 glow = vColor * (1.0 + smoothstep(0.3, 0.0, dist) * 0.5);
+            
+            gl_FragColor = vec4(glow, alpha);
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      particleSystem = new THREE.Points(geometry, particleMaterial);
+      scene.add(particleSystem);
+
+      // Precompute all shape positions
+      precomputeShapes();
+    }
+
+    // Precompute shape positions for smoother morphing
+    const shapePositions = {};
+    function precomputeShapes() {
+      const shapeNames = ['sphere', 'torus', 'cube', 'human', 'disperse'];
+      shapeNames.forEach(name => {
+        shapePositions[name] = new Float32Array(CONFIG.particleCount * 3);
+        for (let i = 0; i < CONFIG.particleCount; i++) {
+          const pos = shapes[name](i, CONFIG.particleCount);
+          shapePositions[name][i * 3] = pos.x;
+          shapePositions[name][i * 3 + 1] = pos.y;
+          shapePositions[name][i * 3 + 2] = pos.z;
+        }
+      });
+    }
+
+    // Scroll handler
+    function onScroll() {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      scrollProgress = window.scrollY / maxScroll;
+    }
+
+    // Resize handler
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Mouse move handler
+    function onMouseMove(e) {
+      const crosshair = document.getElementById('crosshair');
+      crosshair.style.left = e.clientX - 10 + 'px';
+      crosshair.style.top = e.clientY - 10 + 'px';
+    }
+
+    // Update HUD
+    function updateHUD() {
+      // Morph progress
+      const morphProgressEl = document.getElementById('morph-progress');
+      const morphBar = document.getElementById('morph-bar');
+      morphProgressEl.textContent = scrollProgress.toFixed(2);
+      morphBar.style.width = (scrollProgress * 100) + '%';
+
+      // Velocity
+      const velocityEl = document.getElementById('velocity');
+      velocityEl.textContent = Math.abs(scrollVelocity).toFixed(2);
+
+      // Coordinates
+      document.getElementById('coord-x').textContent = camera.position.x.toFixed(3);
+      document.getElementById('coord-y').textContent = camera.position.y.toFixed(3);
+      document.getElementById('coord-z').textContent = camera.position.z.toFixed(3);
+
+      // FPS
+      document.getElementById('fps').textContent = fps;
+      document.getElementById('frame').textContent = totalFrames;
+
+      // Update stage indicators
+      const stages = document.querySelectorAll('.stage-item');
+      stages.forEach((stage, index) => {
+        stage.classList.toggle('active', index === currentStage);
+      });
+
+      // Update phase titles
+      const phases = ['sphere', 'torus', 'cube', 'human', 'disperse'];
+      phases.forEach((phase, index) => {
+        const el = document.getElementById('phase-' + phase);
+        const stageProgress = scrollProgress * 5;
+        const isActive = stageProgress >= index - 0.3 && stageProgress <= index + 0.7;
+        el.classList.toggle('visible', isActive);
+      });
+    }
+
+    // Morph between shapes
+    function morphParticles(progress) {
+      const stages = ['sphere', 'torus', 'cube', 'human', 'disperse'];
+      const stageProgress = progress * (stages.length - 1);
+      const fromStage = Math.floor(stageProgress);
+      const toStage = Math.min(fromStage + 1, stages.length - 1);
+      const t = stageProgress - fromStage;
+
+      currentStage = Math.round(stageProgress);
+
+      const fromPositions = shapePositions[stages[fromStage]];
+      const toPositions = shapePositions[stages[toStage]];
+
+      // Smooth easing
+      const eased = easeInOutCubic(t);
+
+      for (let i = 0; i < CONFIG.particleCount; i++) {
+        const i3 = i * 3;
+        
+        // Interpolate with some noise based on velocity
+        const noiseScale = Math.abs(scrollVelocity) * 0.5;
+        const noise = {
+          x: (Math.random() - 0.5) * noiseScale,
+          y: (Math.random() - 0.5) * noiseScale,
+          z: (Math.random() - 0.5) * noiseScale
+        };
+
+        positions[i3] = lerp(fromPositions[i3], toPositions[i3], eased) + noise.x;
+        positions[i3 + 1] = lerp(fromPositions[i3 + 1], toPositions[i3 + 1], eased) + noise.y;
+        positions[i3 + 2] = lerp(fromPositions[i3 + 2], toPositions[i3 + 2], eased) + noise.z;
+      }
+
+      particleSystem.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // Utility functions
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      frameCount++;
+      totalFrames++;
+
+      const currentTime = performance.now();
+      const delta = currentTime - lastTime;
+      
+      if (delta >= 1000) {
+        fps = Math.round(frameCount * 1000 / delta);
+        frameCount = 0;
+        lastTime = currentTime;
+      }
+
+      // Calculate scroll velocity
+      scrollVelocity = (scrollProgress - lastScrollProgress) * 10;
+      lastScrollProgress = scrollProgress;
+
+      // Update time uniform
+      particleMaterial.uniforms.time.value = currentTime * 0.001;
+      particleMaterial.uniforms.morphProgress.value = scrollProgress;
+
+      // Morph particles
+      morphParticles(scrollProgress);
+
+      // Rotate based on scroll velocity
+      particleSystem.rotation.y += scrollVelocity * 0.1 + 0.001;
+      particleSystem.rotation.x = Math.sin(currentTime * 0.0001) * 0.1;
+
+      // Camera subtle movement
+      camera.position.x = Math.sin(currentTime * 0.0002) * 0.2;
+      camera.position.y = Math.cos(currentTime * 0.0003) * 0.1;
+
+      // Update HUD
+      updateHUD();
+
+      // Render
+      composer.render();
+    }
+
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
