@@ -22,7 +22,7 @@
   // Animated zoom for modal open/close
   let animatedZoom = 1;
   let targetZoom = 1;
-  const zoomSpeed = 4; // Higher = faster animation
+  const zoomSpeed = 2.5; // Smooth animation for deep zoom
   let zoomComplete = true;
   let lastZoomDirection = null; // 'in' or 'out'
 
@@ -42,9 +42,9 @@
   // Stone position - stays centered when modal is open
   $: stonePosition = { x: 0, y: 1.5, z: 0 };  // Always centered
 
-  // Target zoom based on modal state (zoom in when open, zoom out when closed)
+  // Target zoom based on modal state (zoom in deep for "inside rock" illusion)
   $: {
-    const newTarget = modalOpen ? 1.35 : 1;
+    const newTarget = modalOpen ? 3.5 : 1;
     if (newTarget !== targetZoom) {
       targetZoom = newTarget;
       zoomComplete = false;
