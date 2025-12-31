@@ -38,6 +38,10 @@
     dispatch('stoneClick', event.detail);
   }
 
+  function handleZoomComplete(event) {
+    dispatch('zoomComplete', event.detail);
+  }
+
   onMount(() => {
     mounted = true;
     animate();
@@ -52,13 +56,14 @@
 <div class="scene-container">
   {#if mounted}
     <Canvas>
-      <MainScene 
+      <MainScene
         {scrollProgress}
         {currentSection}
         {mousePosition}
         {stones}
         {modalOpen}
         on:stoneClick={handleStoneClick}
+        on:zoomComplete={handleZoomComplete}
       />
     </Canvas>
   {/if}

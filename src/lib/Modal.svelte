@@ -5,17 +5,14 @@
 
   export let stone;
   export let stoneIndex = 0;
+  export let showContent = false; // Controlled by parent for sequenced animation
 
   const dispatch = createEventDispatcher();
 
   let contentRef;
-  let isVisible = false;
 
   function handleClose() {
-    isVisible = false;
-    setTimeout(() => {
-      dispatch('close');
-    }, 300);
+    dispatch('close');
   }
 
   function handleKeydown(event) {
@@ -31,10 +28,6 @@
   }
 
   onMount(() => {
-    // Trigger entrance animation
-    setTimeout(() => {
-      isVisible = true;
-    }, 50);
     contentRef?.focus();
     window.addEventListener('keydown', handleKeydown);
   });
@@ -48,7 +41,7 @@
 
 <div
   class="modal-backdrop"
-  class:visible={isVisible}
+  class:visible={showContent}
   on:click={handleBackdropClick}
   on:keydown={handleKeydown}
   role="button"
@@ -56,9 +49,9 @@
   aria-label="Close modal"
 >
   <!-- Zoom overlay effect -->
-  <div class="zoom-overlay" class:active={isVisible}></div>
+  <div class="zoom-overlay" class:active={showContent}></div>
 
-  {#if isVisible}
+  {#if showContent}
     <div
       bind:this={contentRef}
       class="modal-content"

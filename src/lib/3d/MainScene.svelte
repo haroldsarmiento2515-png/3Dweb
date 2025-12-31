@@ -72,6 +72,10 @@
   function handleStoneClick(event) {
     dispatch('stoneClick', event.detail);
   }
+
+  function handleZoomComplete(event) {
+    dispatch('zoomComplete', event.detail);
+  }
 </script>
 
 <!-- CAMERA - Fixed position, facing forward -->
@@ -119,5 +123,6 @@
     {stones}
     {modalOpen}
     on:stoneClick={handleStoneClick}
+    on:zoomComplete={handleZoomComplete}
   />
 {/if}
