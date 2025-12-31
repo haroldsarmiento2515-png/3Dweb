@@ -295,7 +295,6 @@
   :global(.info-panel) {
     font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
     color: rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
     padding: 12px 16px;
     background: rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.15);

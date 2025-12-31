@@ -22,20 +22,19 @@
   let cameraRef;
 
   // =====================
-  // SIMPLE SCROLL - Normal website style
+  // SIMPLE SCROLL - No transitions, instant switch
   // Hero (0-10%), then stones (10-100%)
   // =====================
   const HERO_END = 0.10;
 
-  // Simple transition from hero to stones view
-  $: transitionProgress = Math.min(1, Math.max(0, scrollProgress / HERO_END));
+  // Scene visibility - instant switch, no fade
+  $: iglooVisible = scrollProgress < HERO_END;
+  $: platformVisible = scrollProgress >= HERO_END;
 
-  // Scene visibility
-  $: iglooOpacity = scrollProgress < HERO_END ? 1 - (scrollProgress / HERO_END) : 0;
-  $: iglooVisible = scrollProgress < HERO_END + 0.02;
-
-  $: platformOpacity = scrollProgress > HERO_END * 0.5 ? 1 : scrollProgress / (HERO_END * 0.5);
-  $: platformVisible = scrollProgress > HERO_END * 0.3;
+  // Fixed opacity - no transitions
+  const iglooOpacity = 1;
+  const platformOpacity = 1;
+  const transitionProgress = 1;
 
   // =====================
   // FIXED CAMERA - Stationary, facing forward

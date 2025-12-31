@@ -175,8 +175,8 @@
   <!-- Wireframe Overlay Effect -->
   <WireframeOverlay {scrollProgress} />
 
-  <!-- Digging Transition Effects (glitch, chromatic aberration, fog) -->
-  <TransitionEffects {scrollProgress} />
+  <!-- Transition Effects disabled for clean scrolling -->
+  <!-- <TransitionEffects {scrollProgress} /> -->
 
   <!-- UI Overlay -->
   {#if showUI}
