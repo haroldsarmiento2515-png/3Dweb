@@ -39,7 +39,6 @@
 
 <div
   class="modal-backdrop"
-  class:visible={showContent}
   on:click={handleBackdropClick}
   on:keydown={handleKeydown}
   role="button"
@@ -61,15 +60,15 @@
       <span class="bracket-corner bottom-right"></span>
     </button>
 
-    <!-- Content panel on the right side -->
+    <!-- Centered content without box -->
     <div
       bind:this={contentRef}
       class="modal-content"
       tabindex="-1"
       role="dialog"
       aria-modal="true"
-      in:fly={{ x: 30, duration: 400, delay: 100, easing: cubicOut }}
-      out:fly={{ x: 20, duration: 200, easing: cubicOut }}
+      in:fly={{ y: 30, duration: 400, delay: 100, easing: cubicOut }}
+      out:fly={{ y: 20, duration: 200, easing: cubicOut }}
     >
       <!-- Section: Summary -->
       <section class="content-section">
@@ -116,33 +115,19 @@
     inset: 0;
     z-index: 100;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    padding: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
     background: transparent;
-    transition: background 0.4s ease;
-  }
-
-  .modal-backdrop.visible {
-    background: linear-gradient(
-      to right,
-      rgba(10, 15, 25, 0.85) 0%,
-      rgba(10, 15, 25, 0.6) 40%,
-      rgba(10, 15, 25, 0.2) 70%,
-      transparent 100%
-    );
   }
 
   .modal-content {
-    position: absolute;
-    right: 50%;
-    top: 50%;
-    transform: translateY(-50%);
+    position: relative;
     max-width: 520px;
     width: 100%;
-    padding: 2rem 3rem;
-    text-align: left;
-    max-height: 80vh;
+    padding: 2rem;
+    text-align: center;
+    max-height: 85vh;
     overflow-y: auto;
   }
 
@@ -223,6 +208,7 @@
 
   .content-section {
     margin-bottom: 2rem;
+    text-align: center;
   }
 
   .section-header {
@@ -230,7 +216,7 @@
     font-size: 0.75rem;
     font-weight: 400;
     letter-spacing: 0.08em;
-    color: rgba(168, 173, 184, 0.5);
+    color: rgba(216, 218, 223, 0.6);
     margin-bottom: 1rem;
   }
 
@@ -238,9 +224,10 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     line-height: 1.8;
-    color: rgba(216, 218, 223, 0.85);
+    color: rgba(240, 242, 245, 0.95);
     letter-spacing: 0.01em;
     margin-bottom: 1.25rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
   .description:last-child {
@@ -251,6 +238,7 @@
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   .link-btn {
@@ -258,59 +246,23 @@
     border: none;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
-    color: rgba(216, 218, 223, 0.7);
+    color: rgba(216, 218, 223, 0.85);
     cursor: pointer;
     padding: 0;
     letter-spacing: 0.02em;
     text-decoration: none;
     transition: color 0.2s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
   .link-btn:hover {
     color: rgba(245, 245, 247, 1);
   }
 
-  @media (max-width: 1200px) {
-    .modal-content {
-      right: 45%;
-      max-width: 480px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .modal-content {
-      right: 40%;
-      max-width: 450px;
-      padding: 2rem;
-    }
-
-    .close-btn {
-      top: 2rem;
-      right: 2rem;
-    }
-  }
-
   @media (max-width: 768px) {
-    .modal-backdrop.visible {
-      background: linear-gradient(
-        to bottom,
-        rgba(10, 15, 25, 0.9) 0%,
-        rgba(10, 15, 25, 0.7) 50%,
-        rgba(10, 15, 25, 0.4) 100%
-      );
-    }
-
     .modal-content {
-      right: auto;
-      left: 0;
-      top: auto;
-      bottom: 0;
-      transform: none;
+      padding: 1.5rem;
       max-width: 100%;
-      width: 100%;
-      max-height: 60vh;
-      padding: 2rem 1.5rem;
-      padding-bottom: 3rem;
     }
 
     .close-btn {
