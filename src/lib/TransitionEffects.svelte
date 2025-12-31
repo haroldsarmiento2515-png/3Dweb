@@ -15,8 +15,8 @@
   // Peak intensity around middle, then fade out smoothly
   $: effectIntensity = Math.sin(transitionProgress * Math.PI);
 
-  // Is the effect active?
-  $: isActive = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END;
+  // DISABLED - no blue transition effects
+  $: isActive = false;
 
   // Chromatic aberration offset (pixels) - dramatic distortion
   $: aberrationOffset = effectIntensity * 25;
