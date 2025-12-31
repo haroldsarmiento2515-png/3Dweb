@@ -62,9 +62,9 @@
 </script>
 
 {#if isLoaded && mountainScene}
-  <!-- Ground platform - well below the igloo -->
+  <!-- Ground platform - lowered to ensure igloo is visible -->
   <T.Group
-    position={[0, -2, 0]}
+    position={[0, -3.5, 0]}
     scale={[50, 15, 50]}
     rotation={[0, 0, 0]}
   >
