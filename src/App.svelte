@@ -3,6 +3,7 @@
   import Scene from './lib/Scene.svelte';
   import Modal from './lib/Modal.svelte';
   import WireframeOverlay from './lib/WireframeOverlay.svelte';
+  import TransitionEffects from './lib/TransitionEffects.svelte';
   import StaticFallback from './lib/StaticFallback.svelte';
 
   // State
@@ -173,6 +174,9 @@
 
   <!-- Wireframe Overlay Effect -->
   <WireframeOverlay {scrollProgress} />
+
+  <!-- Digging Transition Effects (glitch, chromatic aberration, fog) -->
+  <TransitionEffects {scrollProgress} />
 
   <!-- UI Overlay -->
   {#if showUI}
