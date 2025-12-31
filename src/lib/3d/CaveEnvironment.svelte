@@ -74,57 +74,71 @@
   })();
 
   // =====================
-  // STONE 1 -> STONE 2 TRANSITION
+  // STONE 1 -> STONE 2 TRANSITION (with visible gap)
   // =====================
-  // Blank section is 0.38-0.54, transition happens at end of blank section
-  // Transition: 0.48 to 0.58 (Stone 1 goes up, Stone 2 comes from below)
-  const STONE2_TRANSITION_START = 0.48;
-  const STONE2_TRANSITION_END = 0.58;
+  // Stone 1 EXIT: 0.36-0.44 (goes up and disappears)
+  // BLANK GAP: 0.44-0.50 (no stones visible)
+  // Stone 2 ENTER: 0.50-0.58 (comes from below)
 
-  $: stone2TransitionProgress = (() => {
-    if (scrollProgress < STONE2_TRANSITION_START) return 0;
-    if (scrollProgress > STONE2_TRANSITION_END) return 1;
-    return (scrollProgress - STONE2_TRANSITION_START) / (STONE2_TRANSITION_END - STONE2_TRANSITION_START);
+  const STONE1_EXIT_START = 0.36;
+  const STONE1_EXIT_END = 0.44;
+  const STONE2_ENTER_START = 0.50;
+  const STONE2_ENTER_END = 0.58;
+
+  // Stone 1 exit progress (0 to 1 as it leaves)
+  $: stone1ExitProgress = (() => {
+    if (scrollProgress < STONE1_EXIT_START) return 0;
+    if (scrollProgress > STONE1_EXIT_END) return 1;
+    return (scrollProgress - STONE1_EXIT_START) / (STONE1_EXIT_END - STONE1_EXIT_START);
+  })();
+
+  // Stone 2 enter progress (0 to 1 as it arrives)
+  $: stone2EnterProgress = (() => {
+    if (scrollProgress < STONE2_ENTER_START) return 0;
+    if (scrollProgress > STONE2_ENTER_END) return 1;
+    return (scrollProgress - STONE2_ENTER_START) / (STONE2_ENTER_END - STONE2_ENTER_START);
   })();
 
   // Second stone lift animation - scroll controls position from below to center
-  // Starts at y=-15 (far below), ends at y=0 (center) based on scroll
   $: secondStoneLiftOffset = (() => {
-    // Ease-out cubic for smooth deceleration as stone arrives
-    const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 3);
+    const easeOut = 1 - Math.pow(1 - stone2EnterProgress, 3);
     return -15 * (1 - easeOut);  // Starts at -15, ends at 0
   })();
 
   // Second stone scale animation - scroll controls scale
   $: secondStoneScaleBoost = (() => {
-    const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 2);
+    const easeOut = 1 - Math.pow(1 - stone2EnterProgress, 2);
     return 0.3 + (0.7 * easeOut);  // Starts at 0.3, ends at 1.0
   })();
 
   // Second stone rotation animation - scroll controls rotation
   $: secondStoneRotationBoost = (() => {
-    return (1 - stone2TransitionProgress) * Math.PI;  // Full 180 degree rotation
+    return (1 - stone2EnterProgress) * Math.PI;  // Full 180 degree rotation
   })();
 
   // First stone exit animation - scroll controls Stone 1 rising UP
   $: firstStoneExitOffset = (() => {
-    const easeIn = Math.pow(stone2TransitionProgress, 2);
+    const easeIn = Math.pow(stone1ExitProgress, 2);
     return 15 * easeIn;  // Rises UP from 0 to +15
   })();
 
   // First stone exit scale - shrinks as it exits
   $: firstStoneExitScale = (() => {
-    return 1 - (0.7 * stone2TransitionProgress);  // Shrinks from 1.0 to 0.3
+    return 1 - (0.7 * stone1ExitProgress);  // Shrinks from 1.0 to 0.3
   })();
 
   // First stone exit rotation
   $: firstStoneExitRotation = (() => {
-    return stone2TransitionProgress * Math.PI * 0.5;  // Rotates as it exits
+    return stone1ExitProgress * Math.PI * 0.5;  // Rotates as it exits
   })();
 
-  // Determine if stone should be visible during transition
-  // During transition (0 < progress < 1), show BOTH stones
-  $: isInStone1to2Transition = stone2TransitionProgress > 0 && stone2TransitionProgress < 1;
+  // Visibility: Stone 1 visible until exit complete, Stone 2 visible when enter starts
+  $: isStone1Visible = stone1ExitProgress < 1;  // Hide after fully exited
+  $: isStone2Visible = stone2EnterProgress > 0;  // Show when starting to enter
+
+  // Check if we're in any transition phase
+  $: isInStone1to2Transition = (stone1ExitProgress > 0 && stone1ExitProgress < 1) ||
+                                (stone2EnterProgress > 0 && stone2EnterProgress < 1);
 
   // Target zoom based on modal state (zoom in deep for "inside rock" illusion)
   $: {
@@ -267,13 +281,17 @@
   {@const rotY = time * 0.12 + index * Math.PI * 0.5}
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
 
-  <!-- Show stone based on: active stone OR during transition show both stone 0 and 1 -->
+  <!-- Show stone based on visibility flags - allows gap between stones -->
   {@const stoneVisible = (() => {
-    // During Stone 1->2 transition, show BOTH stones so they can swap smoothly
-    if (isInStone1to2Transition && (index === 0 || index === 1)) {
-      return true;
+    // Stone 1: visible until it fully exits (creates gap after)
+    if (index === 0) {
+      return isStone1Visible;
     }
-    // Otherwise show only the active stone
+    // Stone 2: visible when it starts entering (after gap)
+    if (index === 1) {
+      return isStone2Visible;
+    }
+    // Other stones: show only when active
     return index === activeStoneIndex;
   })()}
 
