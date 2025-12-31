@@ -22,8 +22,10 @@
   // Animated zoom for modal open/close
   let animatedZoom = 1;
   let targetZoom = 1;
+  let startZoom = 1;
   const zoomSpeed = 2.5; // Smooth animation for deep zoom
   let zoomComplete = true;
+  let zoomThresholdReached = false; // Track if 70% threshold reached
   let lastZoomDirection = null; // 'in' or 'out'
 
   // =====================
@@ -46,8 +48,10 @@
   $: {
     const newTarget = modalOpen ? 3.5 : 1;
     if (newTarget !== targetZoom) {
+      startZoom = animatedZoom;
       targetZoom = newTarget;
       zoomComplete = false;
+      zoomThresholdReached = false;
       lastZoomDirection = modalOpen ? 'in' : 'out';
     }
   }
@@ -126,13 +130,25 @@
     const diff = targetZoom - animatedZoom;
     if (Math.abs(diff) > 0.001) {
       animatedZoom += diff * Math.min(delta * zoomSpeed, 1);
+
+      // For zoom IN: show text at 70% progress
+      if (lastZoomDirection === 'in' && !zoomThresholdReached) {
+        const totalDistance = targetZoom - startZoom;
+        const currentProgress = animatedZoom - startZoom;
+        const progressPercent = currentProgress / totalDistance;
+        if (progressPercent >= 0.7) {
+          zoomThresholdReached = true;
+          dispatch('zoomComplete', { direction: 'in' });
+        }
+      }
     } else {
       animatedZoom = targetZoom;
-      // Dispatch zoom complete event
-      if (!zoomComplete && lastZoomDirection) {
+      // For zoom OUT: dispatch when fully complete
+      if (!zoomComplete && lastZoomDirection === 'out') {
         zoomComplete = true;
-        dispatch('zoomComplete', { direction: lastZoomDirection });
+        dispatch('zoomComplete', { direction: 'out' });
       }
+      zoomComplete = true;
     }
   });
 
