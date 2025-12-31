@@ -27,8 +27,8 @@
   // Glitch bar count (more at peak intensity)
   $: glitchBarCount = Math.floor(effectIntensity * 12);
 
-  // Fog intensity - reduced to not obscure scene
-  $: fogOpacity = effectIntensity * 0.3;
+  // Fog intensity - heavy fog to create visual gap during stone transmission
+  $: fogOpacity = effectIntensity * 0.85;
 
   // Generate random glitch bars
   let glitchBars = [];
@@ -125,7 +125,7 @@
 
   <!-- Vignette Intensifier -->
   {#if isActive}
-    <div class="vignette-intense" style="opacity: {effectIntensity * 0.4};"></div>
+    <div class="vignette-intense" style="opacity: {effectIntensity * 0.6};"></div>
   {/if}
 </div>
 
@@ -229,10 +229,10 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at center,
-      transparent 0%,
-      rgba(200, 210, 220, 0.2) 30%,
-      rgba(180, 190, 200, 0.4) 60%,
-      rgba(150, 160, 170, 0.5) 100%
+      rgba(200, 210, 220, 0.6) 0%,
+      rgba(190, 200, 210, 0.75) 30%,
+      rgba(180, 190, 200, 0.85) 60%,
+      rgba(170, 180, 190, 0.95) 100%
     );
   }
 
@@ -243,12 +243,12 @@
 
   .fog-2 {
     animation: fog-drift-2 4s ease-in-out infinite;
-    opacity: 0.7;
+    opacity: 0.9;
   }
 
   .fog-3 {
     animation: fog-drift-3 5s ease-in-out infinite;
-    opacity: 0.5;
+    opacity: 0.8;
   }
 
   @keyframes fog-drift-1 {
