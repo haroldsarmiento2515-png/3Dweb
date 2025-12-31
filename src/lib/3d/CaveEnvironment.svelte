@@ -336,157 +336,122 @@
     {@const rotationBoost = animations.rotation}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
-    <!-- TECHNO-MINIMAL BACKGROUND ELEMENTS (Angular/Geometric) -->
+    <!-- TECHNO-MINIMAL BACKGROUND - Abstract Constellation Pattern -->
     <T.Group position={[0, 0, -2]} scale={scaleMultiplier}>
 
-      <!-- Outer hexagon frame (thin lines) -->
-      {#each Array(6) as _, i}
-        {@const angle1 = (i / 6) * Math.PI * 2 + time * 0.05}
-        {@const angle2 = ((i + 1) / 6) * Math.PI * 2 + time * 0.05}
-        {@const r = 4.5}
-        <T.Mesh
-          position={[
-            (Math.cos(angle1) * r + Math.cos(angle2) * r) / 2,
-            (Math.sin(angle1) * r + Math.sin(angle2) * r) / 2,
-            0
-          ]}
-          rotation.z={angle1 + Math.PI / 6}
-        >
-          <T.PlaneGeometry args={[r * 1.02, 0.008]} />
-          <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.35} />
+      <!-- Abstract constellation points - scattered dots -->
+      {#each [
+        [-4.2, 2.8], [-3.5, 1.2], [-4.8, -0.5], [-3.2, -2.4], [-2.0, -3.5],
+        [4.5, 2.2], [3.8, 0.8], [4.2, -1.5], [3.0, -2.8], [2.2, 3.8],
+        [-1.5, 3.2], [0.8, 3.5], [1.8, -3.2], [-0.5, -3.8],
+        [5.2, 0.2], [-5.0, 1.5], [0, 4.2], [-2.5, 0.5], [2.8, 1.5]
+      ] as [px, py], i}
+        {@const pulse = Math.sin(time * 0.8 + i * 0.7) * 0.15}
+        <T.Mesh position={[px, py, 0]}>
+          <T.CircleGeometry args={[0.035 + pulse * 0.01, 6]} />
+          <T.MeshBasicMaterial
+            color={0xd1d5db}
+            transparent
+            opacity={0.4 + pulse}
+          />
         </T.Mesh>
       {/each}
 
-      <!-- Inner hexagon (rotating opposite) -->
-      {#each Array(6) as _, i}
-        {@const angle1 = (i / 6) * Math.PI * 2 - time * 0.08}
-        {@const angle2 = ((i + 1) / 6) * Math.PI * 2 - time * 0.08}
-        {@const r = 3.2}
-        <T.Mesh
-          position={[
-            (Math.cos(angle1) * r + Math.cos(angle2) * r) / 2,
-            (Math.sin(angle1) * r + Math.sin(angle2) * r) / 2,
-            0
-          ]}
-          rotation.z={angle1 + Math.PI / 6}
-        >
-          <T.PlaneGeometry args={[r * 1.02, 0.006]} />
+      <!-- Abstract connecting lines - constellation style -->
+      <!-- Top right cluster -->
+      {#each [
+        [[4.5, 2.2], [3.8, 0.8]],
+        [[3.8, 0.8], [5.2, 0.2]],
+        [[4.5, 2.2], [2.2, 3.8]],
+        [[2.2, 3.8], [0.8, 3.5]],
+        [[3.8, 0.8], [2.8, 1.5]]
+      ] as [[x1, y1], [x2, y2]]}
+        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
+        {@const angle = Math.atan2(y2-y1, x2-x1)}
+        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
+          <T.PlaneGeometry args={[len, 0.004]} />
           <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
         </T.Mesh>
       {/each}
 
-      <!-- Diagonal cross lines -->
-      {#each [Math.PI/4, -Math.PI/4, Math.PI/4 + Math.PI/2, -Math.PI/4 + Math.PI/2] as angle, i}
-        <T.Mesh rotation.z={angle}>
-          <T.PlaneGeometry args={[9, 0.005]} />
-          <T.MeshBasicMaterial color={0x4b5563} transparent opacity={0.12} />
+      <!-- Top left cluster -->
+      {#each [
+        [[-4.2, 2.8], [-3.5, 1.2]],
+        [[-3.5, 1.2], [-5.0, 1.5]],
+        [[-4.2, 2.8], [-1.5, 3.2]],
+        [[-1.5, 3.2], [0, 4.2]],
+        [[-3.5, 1.2], [-2.5, 0.5]]
+      ] as [[x1, y1], [x2, y2]]}
+        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
+        {@const angle = Math.atan2(y2-y1, x2-x1)}
+        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
+          <T.PlaneGeometry args={[len, 0.004]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
         </T.Mesh>
       {/each}
 
-      <!-- Corner bracket markers (angular) -->
-      {#each [[1,1], [1,-1], [-1,1], [-1,-1]] as [dx, dy]}
-        <T.Group position={[dx * 4.2, dy * 3.8, 0]}>
-          <T.Mesh position={[dx * -0.2, 0, 0]}>
-            <T.PlaneGeometry args={[0.4, 0.008]} />
-            <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.5} />
-          </T.Mesh>
-          <T.Mesh position={[0, dy * -0.2, 0]}>
-            <T.PlaneGeometry args={[0.008, 0.4]} />
-            <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.5} />
-          </T.Mesh>
-        </T.Group>
-      {/each}
-
-      <!-- Triangle markers at hexagon vertices -->
-      {#each Array(6) as _, i}
-        {@const angle = (i / 6) * Math.PI * 2 + time * 0.05}
-        {@const r = 4.5}
-        <T.Group position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]}>
-          <!-- Small dot at vertex -->
-          <T.Mesh>
-            <T.CircleGeometry args={[0.04, 4]} />
-            <T.MeshBasicMaterial color={0xd1d5db} transparent opacity={0.6} />
-          </T.Mesh>
-        </T.Group>
-      {/each}
-
-      <!-- Connecting lines from center to outer points -->
-      {#each Array(6) as _, i}
-        {@const angle = (i / 6) * Math.PI * 2 + Math.PI/6 + time * 0.03}
-        <T.Mesh rotation.z={angle}>
-          <T.PlaneGeometry args={[3.5, 0.004]} />
-          <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.15} />
+      <!-- Bottom right cluster -->
+      {#each [
+        [[4.2, -1.5], [3.0, -2.8]],
+        [[3.0, -2.8], [1.8, -3.2]],
+        [[4.2, -1.5], [5.2, 0.2]],
+        [[3.8, 0.8], [4.2, -1.5]]
+      ] as [[x1, y1], [x2, y2]]}
+        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
+        {@const angle = Math.atan2(y2-y1, x2-x1)}
+        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
+          <T.PlaneGeometry args={[len, 0.004]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
         </T.Mesh>
       {/each}
 
-      <!-- Moving data points along edges -->
-      {#each Array(6) as _, i}
-        {@const baseAngle = (i / 6) * Math.PI * 2}
-        {@const progress = ((time * 0.3 + i * 0.5) % 1)}
-        {@const angle1 = baseAngle + time * 0.05}
-        {@const angle2 = ((i + 1) / 6) * Math.PI * 2 + time * 0.05}
-        {@const r = 4.5}
-        {@const x = Math.cos(angle1) * r + (Math.cos(angle2) * r - Math.cos(angle1) * r) * progress}
-        {@const y = Math.sin(angle1) * r + (Math.sin(angle2) * r - Math.sin(angle1) * r) * progress}
-        <T.Mesh position={[x, y, 0]}>
-          <T.CircleGeometry args={[0.03, 4]} />
+      <!-- Bottom left cluster -->
+      {#each [
+        [[-4.8, -0.5], [-3.2, -2.4]],
+        [[-3.2, -2.4], [-2.0, -3.5]],
+        [[-2.0, -3.5], [-0.5, -3.8]],
+        [[-4.8, -0.5], [-5.0, 1.5]],
+        [[-3.5, 1.2], [-4.8, -0.5]]
+      ] as [[x1, y1], [x2, y2]]}
+        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
+        {@const angle = Math.atan2(y2-y1, x2-x1)}
+        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
+          <T.PlaneGeometry args={[len, 0.004]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
+        </T.Mesh>
+      {/each}
+
+      <!-- Floating particles moving along paths -->
+      {#each Array(5) as _, i}
+        {@const t = (time * 0.15 + i * 0.4) % 1}
+        {@const pathPoints = [
+          [[-4.2, 2.8], [-3.5, 1.2], [-4.8, -0.5], [-3.2, -2.4]],
+          [[4.5, 2.2], [3.8, 0.8], [4.2, -1.5], [3.0, -2.8]],
+          [[-1.5, 3.2], [0, 4.2], [0.8, 3.5], [2.2, 3.8]],
+          [[-2.0, -3.5], [-0.5, -3.8], [1.8, -3.2], [3.0, -2.8]],
+          [[-5.0, 1.5], [-2.5, 0.5], [2.8, 1.5], [5.2, 0.2]]
+        ][i]}
+        {@const segIndex = Math.floor(t * (pathPoints.length - 1))}
+        {@const segT = (t * (pathPoints.length - 1)) % 1}
+        {@const p1 = pathPoints[Math.min(segIndex, pathPoints.length - 2)]}
+        {@const p2 = pathPoints[Math.min(segIndex + 1, pathPoints.length - 1)]}
+        <T.Mesh position={[p1[0] + (p2[0] - p1[0]) * segT, p1[1] + (p2[1] - p1[1]) * segT, 0]}>
+          <T.CircleGeometry args={[0.025, 6]} />
           <T.MeshBasicMaterial color={0xffffff} transparent opacity={0.7} />
         </T.Mesh>
       {/each}
 
-      <!-- Inner triangle (slowly rotating) -->
-      {#each Array(3) as _, i}
-        {@const angle1 = (i / 3) * Math.PI * 2 + time * 0.06}
-        {@const angle2 = ((i + 1) / 3) * Math.PI * 2 + time * 0.06}
-        {@const r = 2.2}
-        <T.Mesh
-          position={[
-            (Math.cos(angle1) * r + Math.cos(angle2) * r) / 2,
-            (Math.sin(angle1) * r + Math.sin(angle2) * r) / 2,
-            0
-          ]}
-          rotation.z={angle1 + Math.PI / 3}
-        >
-          <T.PlaneGeometry args={[r * 1.73, 0.006]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.2} />
+      <!-- Subtle pulsing larger dots at key points -->
+      {#each [[-4.2, 2.8], [4.5, 2.2], [-2.0, -3.5], [3.0, -2.8], [0, 4.2]] as [px, py], i}
+        {@const pulse = Math.sin(time * 0.5 + i * 1.2)}
+        <T.Mesh position={[px, py, 0]}>
+          <T.CircleGeometry args={[0.06 + pulse * 0.015, 6]} />
+          <T.MeshBasicMaterial
+            color={0xffffff}
+            transparent
+            opacity={0.15 + pulse * 0.1}
+          />
         </T.Mesh>
-      {/each}
-
-      <!-- Scanning line (horizontal, thin) -->
-      {@const scanY = Math.sin(time * 0.6) * 3.5}
-      <T.Mesh position={[0, scanY, 0]}>
-        <T.PlaneGeometry args={[9, 0.003]} />
-        <T.MeshBasicMaterial color={0xd1d5db} transparent opacity={0.15} />
-      </T.Mesh>
-
-      <!-- Small grid dots at intersections -->
-      {#each [-2, 0, 2] as gx}
-        {#each [-2, 0, 2] as gy}
-          {#if !(gx === 0 && gy === 0)}
-            <T.Mesh position={[gx * 1.2, gy * 1.2, 0]}>
-              <T.CircleGeometry args={[0.02, 4]} />
-              <T.MeshBasicMaterial
-                color={0x9ca3af}
-                transparent
-                opacity={0.25 + Math.sin(time * 1.5 + gx + gy) * 0.1}
-              />
-            </T.Mesh>
-          {/if}
-        {/each}
-      {/each}
-
-      <!-- Outer corner angular accents -->
-      {#each [[5, 2], [-5, 2], [5, -2], [-5, -2], [3, 4], [-3, 4], [3, -4], [-3, -4]] as [px, py], i}
-        <T.Group position={[px, py, 0]} rotation.z={Math.atan2(py, px) + Math.PI}>
-          <T.Mesh position={[0.15, 0, 0]}>
-            <T.PlaneGeometry args={[0.3, 0.005]} />
-            <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.3} />
-          </T.Mesh>
-          <T.Mesh position={[0.3, 0.08, 0]} rotation.z={Math.PI/3}>
-            <T.PlaneGeometry args={[0.15, 0.005]} />
-            <T.MeshBasicMaterial color={0x6b7280} transparent opacity={0.3} />
-          </T.Mesh>
-        </T.Group>
       {/each}
 
     </T.Group>
