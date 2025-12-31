@@ -33,7 +33,7 @@
   // =====================
 
   // Calculate which stone is currently active based on scroll
-  // Matches App.svelte sections: 0.25-0.50=Stone1, 0.50-0.70=Stone2, 0.70-0.85=Stone3, 0.85+=Stone4
+  // Matches App.svelte sections: 0.30-0.50=Stone1, 0.50-0.70=Stone2, 0.70-0.85=Stone3, 0.85+=Stone4
   $: activeStoneIndex = (() => {
     if (scrollProgress < 0.50) return 0;
     if (scrollProgress < 0.70) return 1;
@@ -45,29 +45,29 @@
   $: stonePosition = { x: 0, y: 1.5, z: 0 };  // Always centered
 
   // First stone lift animation - rises dramatically from below during transition
-  // Stone starts at y=-8 (far below view) and rises to y=0 as transitionProgress goes 0 to 1
+  // Stone starts at y=-12 (far below view) and rises to y=0 as transitionProgress goes 0 to 1
   $: firstStoneLiftOffset = (() => {
     if (transitionProgress < 1) {
       // Ease-out cubic curve for smooth deceleration as stone arrives
       const easeOut = 1 - Math.pow(1 - transitionProgress, 3);
-      return -8 * (1 - easeOut);  // Starts at -8, ends at 0
+      return -12 * (1 - easeOut);  // Starts at -12, ends at 0
     }
     return 0;
   })();
 
-  // First stone scale animation - grows as it rises for dramatic entrance
+  // First stone scale animation - grows dramatically as it rises
   $: firstStoneScaleBoost = (() => {
     if (transitionProgress < 1) {
       const easeOut = 1 - Math.pow(1 - transitionProgress, 2);
-      return 0.4 + (0.6 * easeOut);  // Starts at 0.4, ends at 1.0
+      return 0.2 + (0.8 * easeOut);  // Starts at 0.2 (small), ends at 1.0
     }
     return 1;
   })();
 
-  // First stone rotation animation - slight rotation as it rises
+  // First stone rotation animation - dramatic rotation as it rises
   $: firstStoneRotationBoost = (() => {
     if (transitionProgress < 1) {
-      return (1 - transitionProgress) * Math.PI * 0.5;  // Rotates as it rises
+      return (1 - transitionProgress) * Math.PI;  // Full 180 degree rotation
     }
     return 0;
   })();

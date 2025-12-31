@@ -9,15 +9,18 @@
   export let transitionProgress = 0;  // 0 = no transition, 1 = fully transitioned
 
   // Ease-out for smoother deceleration
-  $: easeOutProgress = 1 - Math.pow(1 - transitionProgress, 2);
+  $: easeOutProgress = 1 - Math.pow(1 - transitionProgress, 3);
 
   // Calculate shrink effect - igloo shrinks dramatically as we "walk away"
-  // Scale goes from 1.0 to 0.1 with ease-out curve
-  $: shrinkScale = Math.max(0.1, 1 - (easeOutProgress * 0.9));
+  // Scale goes from 1.0 to 0.05 with ease-out curve
+  $: shrinkScale = Math.max(0.05, 1 - (easeOutProgress * 0.95));
 
   // Position offset - igloo moves back significantly and sinks as we walk away
-  $: positionOffsetZ = -easeOutProgress * 15;  // Move far back into distance
-  $: positionOffsetY = -easeOutProgress * 3;   // Sink down more noticeably
+  $: positionOffsetZ = -easeOutProgress * 25;  // Move far back into distance
+  $: positionOffsetY = -easeOutProgress * 5;   // Sink down more noticeably
+
+  // Rotation as it moves away
+  $: rotationOffset = easeOutProgress * 0.3;
 
   let time = 0;
   
@@ -71,10 +74,12 @@
 </script>
 
 {#if visible && $iglooGltf}
-  <!-- Outer group for transition animation (shrink + move back) -->
+  <!-- Outer group for transition animation (shrink + move back + rotate) -->
   <T.Group
     position={[0, positionOffsetY, positionOffsetZ]}
     scale={[shrinkScale, shrinkScale, shrinkScale]}
+    rotation.x={rotationOffset * 0.5}
+    rotation.y={rotationOffset}
   >
     <!-- Inner group - CENTERED igloo for visible transition -->
     <T.Group

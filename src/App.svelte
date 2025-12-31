@@ -148,8 +148,8 @@
     scrollProgress = scrollTop / scrollHeight;
 
     // 5 sections with longer hero for transition visibility
-    // Hero: 0-25%, Stone1: 25-50%, Stone2: 50-70%, Stone3: 70-85%, Stone4: 85-100%
-    if (scrollProgress < 0.25) currentSection = 0;
+    // Hero: 0-30%, Stone1: 30-50%, Stone2: 50-70%, Stone3: 70-85%, Stone4: 85-100%
+    if (scrollProgress < 0.30) currentSection = 0;
     else if (scrollProgress < 0.50) currentSection = 1;
     else if (scrollProgress < 0.70) currentSection = 2;
     else if (scrollProgress < 0.85) currentSection = 3;
@@ -274,27 +274,13 @@
     {/if}
   {/if}
 
-  <!-- Scroll Container - Simple sections: Igloo + 4 Stones -->
-  <div class="scroll-container relative" style="z-index: 0; pointer-events: none;">
-    <section class="section" id="hero">
-      <div style="height: 100vh;"></div>
-    </section>
-
-    <section class="section" id="stone-1">
-      <div style="height: 80vh;"></div>
-    </section>
-
-    <section class="section" id="stone-2">
-      <div style="height: 50vh;"></div>
-    </section>
-
-    <section class="section" id="stone-3">
-      <div style="height: 50vh;"></div>
-    </section>
-
-    <section class="section" id="stone-4">
-      <div style="height: 50vh;"></div>
-    </section>
+  <!-- Scroll Container - Tall sections for smooth scrolling -->
+  <div class="scroll-container">
+    <section class="section" id="hero" style="height: 150vh;"></section>
+    <section class="section" id="stone-1" style="height: 100vh;"></section>
+    <section class="section" id="stone-2" style="height: 100vh;"></section>
+    <section class="section" id="stone-3" style="height: 100vh;"></section>
+    <section class="section" id="stone-4" style="height: 100vh;"></section>
   </div>
 
   <!-- Modal -->
