@@ -33,12 +33,12 @@
   // =====================
 
   // Calculate which stone is currently active based on scroll
-  // Matches App.svelte sections with blank section:
-  // Hero: 0-23%, Stone1: 23-54%, Stone2: 54-69%, Stone3: 69-85%, Stone4: 85-100%
+  // Matches App.svelte sections with blank sections between all stones:
+  // Hero: 0-18%, Stone1+Blank: 18-41%, Stone2+Blank: 41-65%, Stone3+Blank: 65-88%, Stone4: 88-100%
   $: activeStoneIndex = (() => {
-    if (scrollProgress < 0.54) return 0;  // Stone 1 (longer section with blank)
-    if (scrollProgress < 0.69) return 1;  // Stone 2
-    if (scrollProgress < 0.85) return 2;  // Stone 3
+    if (scrollProgress < 0.41) return 0;  // Stone 1 area
+    if (scrollProgress < 0.65) return 1;  // Stone 2 area
+    if (scrollProgress < 0.88) return 2;  // Stone 3 area
     return 3;                             // Stone 4
   })();
 
@@ -74,71 +74,115 @@
   })();
 
   // =====================
-  // STONE 1 -> STONE 2 TRANSITION (with visible gap)
+  // ALL STONE TRANSITIONS (with visible gaps)
   // =====================
-  // Stone 1 EXIT: 0.36-0.44 (goes up and disappears)
-  // BLANK GAP: 0.44-0.50 (no stones visible)
-  // Stone 2 ENTER: 0.50-0.58 (comes from below)
+  // Each transition: Current stone exits UP -> GAP -> Next stone enters from below
+  // Total: 850vh - Hero(150) + Stone1(100) + Blank(100) + Stone2(100) + Blank(100) + Stone3(100) + Blank(100) + Stone4(100)
 
-  const STONE1_EXIT_START = 0.36;
-  const STONE1_EXIT_END = 0.44;
-  const STONE2_ENTER_START = 0.50;
-  const STONE2_ENTER_END = 0.58;
+  // STONE 1 -> STONE 2 TRANSITION (around 29-41% scroll)
+  const STONE1_EXIT_START = 0.26;
+  const STONE1_EXIT_END = 0.32;
+  const STONE2_ENTER_START = 0.36;
+  const STONE2_ENTER_END = 0.42;
 
-  // Stone 1 exit progress (0 to 1 as it leaves)
-  $: stone1ExitProgress = (() => {
-    if (scrollProgress < STONE1_EXIT_START) return 0;
-    if (scrollProgress > STONE1_EXIT_END) return 1;
-    return (scrollProgress - STONE1_EXIT_START) / (STONE1_EXIT_END - STONE1_EXIT_START);
-  })();
+  // STONE 2 -> STONE 3 TRANSITION (around 53-65% scroll)
+  const STONE2_EXIT_START = 0.50;
+  const STONE2_EXIT_END = 0.56;
+  const STONE3_ENTER_START = 0.60;
+  const STONE3_ENTER_END = 0.66;
 
-  // Stone 2 enter progress (0 to 1 as it arrives)
-  $: stone2EnterProgress = (() => {
-    if (scrollProgress < STONE2_ENTER_START) return 0;
-    if (scrollProgress > STONE2_ENTER_END) return 1;
-    return (scrollProgress - STONE2_ENTER_START) / (STONE2_ENTER_END - STONE2_ENTER_START);
-  })();
+  // STONE 3 -> STONE 4 TRANSITION (around 76-88% scroll)
+  const STONE3_EXIT_START = 0.74;
+  const STONE3_EXIT_END = 0.80;
+  const STONE4_ENTER_START = 0.84;
+  const STONE4_ENTER_END = 0.90;
 
-  // Second stone lift animation - scroll controls position from below to center
-  $: secondStoneLiftOffset = (() => {
-    const easeOut = 1 - Math.pow(1 - stone2EnterProgress, 3);
-    return -15 * (1 - easeOut);  // Starts at -15, ends at 0
-  })();
+  // Helper function to calculate progress
+  function calcProgress(scroll, start, end) {
+    if (scroll < start) return 0;
+    if (scroll > end) return 1;
+    return (scroll - start) / (end - start);
+  }
 
-  // Second stone scale animation - scroll controls scale
-  $: secondStoneScaleBoost = (() => {
-    const easeOut = 1 - Math.pow(1 - stone2EnterProgress, 2);
-    return 0.3 + (0.7 * easeOut);  // Starts at 0.3, ends at 1.0
-  })();
+  // Exit progress for each stone (0 to 1 as it leaves going UP)
+  $: stone1ExitProgress = calcProgress(scrollProgress, STONE1_EXIT_START, STONE1_EXIT_END);
+  $: stone2ExitProgress = calcProgress(scrollProgress, STONE2_EXIT_START, STONE2_EXIT_END);
+  $: stone3ExitProgress = calcProgress(scrollProgress, STONE3_EXIT_START, STONE3_EXIT_END);
 
-  // Second stone rotation animation - scroll controls rotation
-  $: secondStoneRotationBoost = (() => {
-    return (1 - stone2EnterProgress) * Math.PI;  // Full 180 degree rotation
-  })();
+  // Enter progress for each stone (0 to 1 as it arrives from below)
+  $: stone2EnterProgress = calcProgress(scrollProgress, STONE2_ENTER_START, STONE2_ENTER_END);
+  $: stone3EnterProgress = calcProgress(scrollProgress, STONE3_ENTER_START, STONE3_ENTER_END);
+  $: stone4EnterProgress = calcProgress(scrollProgress, STONE4_ENTER_START, STONE4_ENTER_END);
 
-  // First stone exit animation - scroll controls Stone 1 rising UP
-  $: firstStoneExitOffset = (() => {
-    const easeIn = Math.pow(stone1ExitProgress, 2);
-    return 15 * easeIn;  // Rises UP from 0 to +15
-  })();
+  // Calculate lift offset for entering stones (from below to center)
+  function calcEnterLift(progress) {
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+    return -15 * (1 - easeOut);
+  }
 
-  // First stone exit scale - shrinks as it exits
-  $: firstStoneExitScale = (() => {
-    return 1 - (0.7 * stone1ExitProgress);  // Shrinks from 1.0 to 0.3
-  })();
+  // Calculate scale for entering stones
+  function calcEnterScale(progress) {
+    const easeOut = 1 - Math.pow(1 - progress, 2);
+    return 0.3 + (0.7 * easeOut);
+  }
 
-  // First stone exit rotation
-  $: firstStoneExitRotation = (() => {
-    return stone1ExitProgress * Math.PI * 0.5;  // Rotates as it exits
-  })();
+  // Calculate rotation for entering stones
+  function calcEnterRotation(progress) {
+    return (1 - progress) * Math.PI;
+  }
 
-  // Visibility: Stone 1 visible until exit complete, Stone 2 visible when enter starts
-  $: isStone1Visible = stone1ExitProgress < 1;  // Hide after fully exited
-  $: isStone2Visible = stone2EnterProgress > 0;  // Show when starting to enter
+  // Calculate lift offset for exiting stones (center to above)
+  function calcExitLift(progress) {
+    const easeIn = Math.pow(progress, 2);
+    return 15 * easeIn;
+  }
 
-  // Check if we're in any transition phase
-  $: isInStone1to2Transition = (stone1ExitProgress > 0 && stone1ExitProgress < 1) ||
-                                (stone2EnterProgress > 0 && stone2EnterProgress < 1);
+  // Calculate scale for exiting stones
+  function calcExitScale(progress) {
+    return 1 - (0.7 * progress);
+  }
+
+  // Calculate rotation for exiting stones
+  function calcExitRotation(progress) {
+    return progress * Math.PI * 0.5;
+  }
+
+  // Stone visibility (visible until exit complete, or when enter starts)
+  $: isStone1Visible = stone1ExitProgress < 1;
+  $: isStone2Visible = stone2EnterProgress > 0 && stone2ExitProgress < 1;
+  $: isStone3Visible = stone3EnterProgress > 0 && stone3ExitProgress < 1;
+  $: isStone4Visible = stone4EnterProgress > 0;
+
+  // Combined animations for each stone
+  $: stoneAnimations = [
+    // Stone 1: entry from igloo + exit to stone 2
+    {
+      liftOffset: firstStoneLiftOffset + calcExitLift(stone1ExitProgress),
+      scale: firstStoneScaleBoost * calcExitScale(stone1ExitProgress),
+      rotation: firstStoneRotationBoost + calcExitRotation(stone1ExitProgress)
+    },
+    // Stone 2: enter from stone 1 + exit to stone 3
+    {
+      liftOffset: calcEnterLift(stone2EnterProgress) + calcExitLift(stone2ExitProgress),
+      scale: calcEnterScale(stone2EnterProgress) * calcExitScale(stone2ExitProgress),
+      rotation: calcEnterRotation(stone2EnterProgress) + calcExitRotation(stone2ExitProgress)
+    },
+    // Stone 3: enter from stone 2 + exit to stone 4
+    {
+      liftOffset: calcEnterLift(stone3EnterProgress) + calcExitLift(stone3ExitProgress),
+      scale: calcEnterScale(stone3EnterProgress) * calcExitScale(stone3ExitProgress),
+      rotation: calcEnterRotation(stone3EnterProgress) + calcExitRotation(stone3ExitProgress)
+    },
+    // Stone 4: enter from stone 3 (no exit)
+    {
+      liftOffset: calcEnterLift(stone4EnterProgress),
+      scale: calcEnterScale(stone4EnterProgress),
+      rotation: calcEnterRotation(stone4EnterProgress)
+    }
+  ];
+
+  // Array of visibility flags
+  $: stoneVisibility = [isStone1Visible, isStone2Visible, isStone3Visible, isStone4Visible];
 
   // Target zoom based on modal state (zoom in deep for "inside rock" illusion)
   $: {
@@ -282,52 +326,14 @@
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
 
   <!-- Show stone based on visibility flags - allows gap between stones -->
-  {@const stoneVisible = (() => {
-    // Stone 1: visible until it fully exits (creates gap after)
-    if (index === 0) {
-      return isStone1Visible;
-    }
-    // Stone 2: visible when it starts entering (after gap)
-    if (index === 1) {
-      return isStone2Visible;
-    }
-    // Other stones: show only when active
-    return index === activeStoneIndex;
-  })()}
+  {@const stoneVisible = stoneVisibility[index] ?? false}
 
   {#if stoneVisible}
-    <!-- Apply transition animations based on stone index - scroll controls position -->
-    {@const liftOffset = (() => {
-      if (index === 0) {
-        // First stone: entry animation + exit (rises UP based on scroll)
-        return firstStoneLiftOffset + firstStoneExitOffset;
-      }
-      if (index === 1) {
-        // Second stone: scroll controls rise from below
-        return secondStoneLiftOffset;
-      }
-      return 0;
-    })()}
-    {@const scaleMultiplier = (() => {
-      if (index === 0) {
-        // First stone: entry scale * exit scale (shrinks based on scroll)
-        return firstStoneScaleBoost * firstStoneExitScale;
-      }
-      if (index === 1) {
-        // Second stone: scroll controls scale
-        return secondStoneScaleBoost;
-      }
-      return 1;
-    })()}
-    {@const rotationBoost = (() => {
-      if (index === 0) {
-        return firstStoneRotationBoost + firstStoneExitRotation;
-      }
-      if (index === 1) {
-        return secondStoneRotationBoost;
-      }
-      return 0;
-    })()}
+    <!-- Apply transition animations from stoneAnimations array -->
+    {@const animations = stoneAnimations[index] || { liftOffset: 0, scale: 1, rotation: 0 }}
+    {@const liftOffset = animations.liftOffset}
+    {@const scaleMultiplier = animations.scale}
+    {@const rotationBoost = animations.rotation}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
     <!-- Main rock mesh - loaded GLTF model -->
