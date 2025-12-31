@@ -4,6 +4,7 @@
   import Modal from './lib/Modal.svelte';
   import WireframeOverlay from './lib/WireframeOverlay.svelte';
   import TransitionEffects from './lib/TransitionEffects.svelte';
+  import IglooTransition from './lib/IglooTransition.svelte';
   import StaticFallback from './lib/StaticFallback.svelte';
 
   // State
@@ -187,6 +188,9 @@
 
   <!-- Wireframe Overlay Effect -->
   <WireframeOverlay {scrollProgress} />
+
+  <!-- Igloo Entrance Transition Effect -->
+  <IglooTransition {scrollProgress} />
 
   <!-- Transition Effects disabled for clean scrolling -->
   <!-- <TransitionEffects {scrollProgress} /> -->
