@@ -85,55 +85,44 @@
     return (scrollProgress - STONE2_TRANSITION_START) / (STONE2_TRANSITION_END - STONE2_TRANSITION_START);
   })();
 
-  // Second stone lift animation - rises dramatically from below during transition
+  // Second stone lift animation - scroll controls position from below to center
+  // Starts at y=-15 (far below), ends at y=0 (center) based on scroll
   $: secondStoneLiftOffset = (() => {
-    if (stone2TransitionProgress < 1) {
-      // Ease-out cubic curve for smooth deceleration as stone arrives
-      const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 3);
-      return -12 * (1 - easeOut);  // Starts at -12, ends at 0
-    }
-    return 0;
+    // Ease-out cubic for smooth deceleration as stone arrives
+    const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 3);
+    return -15 * (1 - easeOut);  // Starts at -15, ends at 0
   })();
 
-  // Second stone scale animation - grows dramatically as it rises
+  // Second stone scale animation - scroll controls scale
   $: secondStoneScaleBoost = (() => {
-    if (stone2TransitionProgress < 1) {
-      const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 2);
-      return 0.2 + (0.8 * easeOut);  // Starts at 0.2 (small), ends at 1.0
-    }
-    return 1;
+    const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 2);
+    return 0.3 + (0.7 * easeOut);  // Starts at 0.3, ends at 1.0
   })();
 
-  // Second stone rotation animation - dramatic rotation as it rises
+  // Second stone rotation animation - scroll controls rotation
   $: secondStoneRotationBoost = (() => {
-    if (stone2TransitionProgress < 1) {
-      return (1 - stone2TransitionProgress) * Math.PI;  // Full 180 degree rotation
-    }
-    return 0;
+    return (1 - stone2TransitionProgress) * Math.PI;  // Full 180 degree rotation
   })();
 
-  // First stone exit animation - stone 1 rises UP and exits when transitioning to stone 2
+  // First stone exit animation - scroll controls Stone 1 rising UP
   $: firstStoneExitOffset = (() => {
-    if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
-      const easeIn = Math.pow(stone2TransitionProgress, 2);
-      return 12 * easeIn;  // Rises UP (positive Y)
-    }
-    return 0;
+    const easeIn = Math.pow(stone2TransitionProgress, 2);
+    return 15 * easeIn;  // Rises UP from 0 to +15
   })();
 
+  // First stone exit scale - shrinks as it exits
   $: firstStoneExitScale = (() => {
-    if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
-      return 1 - (0.6 * stone2TransitionProgress);  // Shrinks to 0.4
-    }
-    return stone2TransitionProgress >= 1 ? 0.4 : 1;
+    return 1 - (0.7 * stone2TransitionProgress);  // Shrinks from 1.0 to 0.3
   })();
 
+  // First stone exit rotation
   $: firstStoneExitRotation = (() => {
-    if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
-      return stone2TransitionProgress * Math.PI * 0.5;  // Rotates as it exits
-    }
-    return 0;
+    return stone2TransitionProgress * Math.PI * 0.5;  // Rotates as it exits
   })();
+
+  // Determine if stone should be visible during transition
+  // During transition (0 < progress < 1), show BOTH stones
+  $: isInStone1to2Transition = stone2TransitionProgress > 0 && stone2TransitionProgress < 1;
 
   // Target zoom based on modal state (zoom in deep for "inside rock" illusion)
   $: {
@@ -269,35 +258,43 @@
   }
 </script>
 
-<!-- Main clickable stones - ONE AT A TIME, centered -->
+<!-- Main clickable stones -->
 {#each stones as stone, index}
   {@const isHovered = hoveredStone === index}
   {@const floatY = Math.sin(time * 0.4 + index * 1.5) * 0.06}
   {@const rotY = time * 0.12 + index * Math.PI * 0.5}
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
 
-  <!-- Only show the active stone -->
-  {@const stoneVisible = index === activeStoneIndex}
+  <!-- Show stone based on: active stone OR during transition show both stone 0 and 1 -->
+  {@const stoneVisible = (() => {
+    // During Stone 1->2 transition, show BOTH stones so they can swap smoothly
+    if (isInStone1to2Transition && (index === 0 || index === 1)) {
+      return true;
+    }
+    // Otherwise show only the active stone
+    return index === activeStoneIndex;
+  })()}
 
   {#if stoneVisible}
-    <!-- Apply transition animations based on stone index -->
+    <!-- Apply transition animations based on stone index - scroll controls position -->
     {@const liftOffset = (() => {
       if (index === 0) {
-        // First stone: entry animation + exit animation when transitioning to stone 2
+        // First stone: entry animation + exit (rises UP based on scroll)
         return firstStoneLiftOffset + firstStoneExitOffset;
       }
       if (index === 1) {
-        // Second stone: entry animation during stone1->stone2 transition
+        // Second stone: scroll controls rise from below
         return secondStoneLiftOffset;
       }
       return 0;
     })()}
     {@const scaleMultiplier = (() => {
       if (index === 0) {
-        // First stone: entry scale + exit scale
+        // First stone: entry scale * exit scale (shrinks based on scroll)
         return firstStoneScaleBoost * firstStoneExitScale;
       }
       if (index === 1) {
+        // Second stone: scroll controls scale
         return secondStoneScaleBoost;
       }
       return 1;
