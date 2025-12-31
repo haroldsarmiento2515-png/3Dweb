@@ -22,7 +22,9 @@
   // Animated zoom for modal open/close
   let animatedZoom = 1;
   let targetZoom = 1;
-  const zoomSpeed = 3; // Higher = faster animation
+  const zoomSpeed = 4; // Higher = faster animation
+  let zoomComplete = true;
+  let lastZoomDirection = null; // 'in' or 'out'
 
   // =====================
   // NORMAL SCROLL - Show one stone at a time, centered
@@ -41,7 +43,14 @@
   $: stonePosition = { x: 0, y: 1.5, z: 0 };  // Always centered
 
   // Target zoom based on modal state (zoom in when open, zoom out when closed)
-  $: targetZoom = modalOpen ? 1.35 : 1;
+  $: {
+    const newTarget = modalOpen ? 1.35 : 1;
+    if (newTarget !== targetZoom) {
+      targetZoom = newTarget;
+      zoomComplete = false;
+      lastZoomDirection = modalOpen ? 'in' : 'out';
+    }
+  }
 
   // Stone hover states
   let hoveredStone = -1;
@@ -119,6 +128,11 @@
       animatedZoom += diff * Math.min(delta * zoomSpeed, 1);
     } else {
       animatedZoom = targetZoom;
+      // Dispatch zoom complete event
+      if (!zoomComplete && lastZoomDirection) {
+        zoomComplete = true;
+        dispatch('zoomComplete', { direction: lastZoomDirection });
+      }
     }
   });
 

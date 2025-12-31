@@ -10,6 +10,8 @@
   let scrollProgress = 0;
   let currentSection = 0;
   let modalOpen = false;
+  let showModalContent = false; // Separate state for modal content visibility
+  let isClosing = false; // Track if we're in closing animation
   let selectedStone = null;
   let selectedStoneIndex = 0;
   let webglSupported = true;
@@ -87,18 +89,37 @@
     soundEnabled = !soundEnabled;
   }
 
-  // Handle stone click
+  // Handle stone click - start zoom in, content shows after zoom completes
   function handleStoneClick(stone) {
+    if (isClosing) return; // Don't open while closing
     selectedStone = stone;
     selectedStoneIndex = stones.findIndex(s => s.id === stone.id);
-    modalOpen = true;
+    modalOpen = true; // This triggers zoom in
+    // Content will show when zoomComplete event fires with direction 'in'
   }
 
-  // Handle modal close
+  // Handle zoom complete event from 3D scene
+  function handleZoomComplete(event) {
+    const { direction } = event.detail;
+    if (direction === 'in') {
+      // Zoom in complete, now show modal content
+      showModalContent = true;
+    } else if (direction === 'out') {
+      // Zoom out complete, fully close modal
+      selectedStone = null;
+      selectedStoneIndex = 0;
+      isClosing = false;
+    }
+  }
+
+  // Handle modal close - hide content first, then zoom out
   function handleModalClose() {
-    modalOpen = false;
-    selectedStone = null;
-    selectedStoneIndex = 0;
+    isClosing = true;
+    showModalContent = false; // Hide content first
+    // Wait for content to fade out, then trigger zoom out
+    setTimeout(() => {
+      modalOpen = false; // This triggers zoom out
+    }, 300); // Match the modal content exit animation duration
   }
 
   // Get which stone is active (0-3) based on section
@@ -144,12 +165,13 @@
   <!-- 3D Canvas -->
   {#if mounted && webglSupported && !prefersReducedMotion}
     <div class="canvas-container webgl-canvas">
-      <Scene 
-        {scrollProgress} 
+      <Scene
+        {scrollProgress}
         {currentSection}
         {stones}
         {modalOpen}
         on:stoneClick={(e) => handleStoneClick(e.detail)}
+        on:zoomComplete={handleZoomComplete}
       />
     </div>
   {/if}
@@ -266,10 +288,11 @@
   </div>
 
   <!-- Modal -->
-  {#if modalOpen && selectedStone}
-    <Modal 
+  {#if (modalOpen || isClosing) && selectedStone}
+    <Modal
       stone={selectedStone}
       stoneIndex={selectedStoneIndex}
+      showContent={showModalContent}
       on:close={handleModalClose}
     />
   {/if}
