@@ -62,38 +62,38 @@
 </script>
 
 {#if isLoaded && mountainScene}
-  <!-- Ground platform - mountain terrain under the igloo -->
+  <!-- Ground platform - flat area for igloo to sit on -->
   <T.Group
-    position={[0, 8, 0]}
-    scale={[60, 60, 60]}
+    position={[0, 5.5, 5]}
+    scale={[50, 30, 50]}
     rotation={[0, 0, 0]}
   >
     <T is={mountainScene} />
   </T.Group>
 
-  <!-- Main mountain - center back, large and dominant -->
+  <!-- Main mountain - center back backdrop -->
   <T.Group
-    position={[0, 4, -25]}
-    scale={[150, 150, 150]}
-    rotation={[0, Math.PI, 0]}
+    position={[0, -5, -50]}
+    scale={[200, 200, 200]}
+    rotation={[0, 0, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
 
-  <!-- Second mountain - right side -->
+  <!-- Second mountain - right side backdrop -->
   <T.Group
-    position={[30, 3, -30]}
-    scale={[120, 120, 120]}
-    rotation={[0, Math.PI + 0.5, 0]}
+    position={[45, -8, -60]}
+    scale={[180, 180, 180]}
+    rotation={[0, 0.3, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
 
-  <!-- Third mountain - left side -->
+  <!-- Third mountain - left side backdrop -->
   <T.Group
-    position={[-30, 3, -28]}
-    scale={[110, 110, 110]}
-    rotation={[0, Math.PI - 0.5, 0]}
+    position={[-45, -7, -55]}
+    scale={[170, 170, 170]}
+    rotation={[0, -0.3, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
