@@ -41,16 +41,12 @@
 
 <div
   class="modal-backdrop"
-  class:visible={showContent}
   on:click={handleBackdropClick}
   on:keydown={handleKeydown}
   role="button"
   tabindex="-1"
   aria-label="Close modal"
 >
-  <!-- Zoom overlay effect -->
-  <div class="zoom-overlay" class:active={showContent}></div>
-
   {#if showContent}
     <div
       bind:this={contentRef}
@@ -147,27 +143,8 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: rgba(10, 12, 16, 0);
-    transition: background 0.5s ease;
+    background: transparent;
     overflow-y: auto;
-  }
-
-  .modal-backdrop.visible {
-    background: rgba(10, 12, 16, 0.85);
-  }
-
-  /* Zoom overlay effect */
-  .zoom-overlay {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at 60% 50%, transparent 0%, rgba(10, 12, 16, 0.95) 70%);
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    pointer-events: none;
-  }
-
-  .zoom-overlay.active {
-    opacity: 1;
   }
 
   .modal-content {
