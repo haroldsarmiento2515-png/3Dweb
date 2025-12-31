@@ -28,18 +28,26 @@
   let cameraRef;
 
   // =====================
-  // SIMPLE SCROLL - No transitions, instant switch
-  // Hero (0-10%), then stones (10-100%)
+  // TRANSITION ZONE - Overlap for smooth igloo-to-stone transition
+  // Igloo visible until 15%, stones visible from 5%
+  // Transition zone: 5% - 15% where both are visible
   // =====================
-  const HERO_END = 0.10;
+  const TRANSITION_START = 0.05;  // When transition begins
+  const TRANSITION_END = 0.15;    // When transition completes
+  const HERO_END = 0.10;          // Midpoint of transition
 
-  // Scene visibility - instant switch, no fade
-  $: iglooVisible = scrollProgress < HERO_END;
-  $: platformVisible = scrollProgress >= HERO_END;
+  // Scene visibility - overlap during transition
+  $: iglooVisible = scrollProgress < TRANSITION_END;
+  $: platformVisible = scrollProgress >= TRANSITION_START;
 
-  // Fixed opacity - no transitions
-  const iglooOpacity = 1;
-  const platformOpacity = 1;
+  // Calculate transition progress (0 at start, 1 at end)
+  $: iglooTransitionProgress = Math.min(1, Math.max(0, (scrollProgress - TRANSITION_START) / (TRANSITION_END - TRANSITION_START)));
+
+  // Igloo fades and shrinks during transition
+  $: iglooOpacity = Math.max(0, 1 - iglooTransitionProgress * 1.2);
+
+  // Platform fades in during transition
+  $: platformOpacity = Math.min(1, iglooTransitionProgress * 1.5);
   const transitionProgress = 1;
 
   // =====================
@@ -103,7 +111,7 @@
 {#if iglooVisible}
   <T.Group position={[0, 0, 0]} scale={[1, 1, 1]}>
     <Mountains opacity={iglooOpacity} />
-    <Igloo {scrollProgress} visible={true} opacity={iglooOpacity} />
+    <Igloo {scrollProgress} visible={true} opacity={iglooOpacity} transitionProgress={iglooTransitionProgress} />
   </T.Group>
 {/if}
 
@@ -118,7 +126,7 @@
     opacity={platformOpacity}
     {scrollProgress}
     {currentSection}
-    transitionProgress={transitionProgress}
+    transitionProgress={iglooTransitionProgress}
     caveDepthProgress={0}
     {stones}
     {modalOpen}

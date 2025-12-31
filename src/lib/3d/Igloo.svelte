@@ -6,6 +6,15 @@
   export let scrollProgress = 0;
   export let visible = true;
   export let opacity = 1;
+  export let transitionProgress = 0;  // 0 = no transition, 1 = fully transitioned
+
+  // Calculate shrink effect - igloo shrinks as we "walk away"
+  // Scale goes from 1.0 to 0.3 as transitionProgress goes 0 to 1
+  $: shrinkScale = 1 - (transitionProgress * 0.7);
+
+  // Position offset - igloo moves back and down as we walk away
+  $: positionOffsetZ = -transitionProgress * 8;  // Move back into distance
+  $: positionOffsetY = -transitionProgress * 1.5;  // Sink slightly
 
   let time = 0;
   
@@ -59,12 +68,19 @@
 </script>
 
 {#if visible && $iglooGltf}
-  <T.Group 
-position={[4, -0.3, -4]}
-scale={[0.3, 0.3, 0.3]}
-rotation={[Math.PI /-1,0.1, Math.PI / 1]}
+  <!-- Outer group for transition animation (shrink + move back) -->
+  <T.Group
+    position={[0, positionOffsetY, positionOffsetZ]}
+    scale={[shrinkScale, shrinkScale, shrinkScale]}
   >
-    <T is={$iglooGltf.scene} />
+    <!-- Inner group with original igloo positioning -->
+    <T.Group
+      position={[4, -0.3, -4]}
+      scale={[0.3, 0.3, 0.3]}
+      rotation={[Math.PI /-1, 0.1, Math.PI / 1]}
+    >
+      <T is={$iglooGltf.scene} />
+    </T.Group>
   </T.Group>
   
   <!-- Extra lighting for igloo -->
