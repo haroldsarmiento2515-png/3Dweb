@@ -33,12 +33,13 @@
   // =====================
 
   // Calculate which stone is currently active based on scroll
-  // Matches App.svelte sections: 0.30-0.50=Stone1, 0.50-0.70=Stone2, 0.70-0.85=Stone3, 0.85+=Stone4
+  // Matches App.svelte sections with blank section:
+  // Hero: 0-23%, Stone1: 23-54%, Stone2: 54-69%, Stone3: 69-85%, Stone4: 85-100%
   $: activeStoneIndex = (() => {
-    if (scrollProgress < 0.50) return 0;
-    if (scrollProgress < 0.70) return 1;
-    if (scrollProgress < 0.85) return 2;
-    return 3;
+    if (scrollProgress < 0.54) return 0;  // Stone 1 (longer section with blank)
+    if (scrollProgress < 0.69) return 1;  // Stone 2
+    if (scrollProgress < 0.85) return 2;  // Stone 3
+    return 3;                             // Stone 4
   })();
 
   // Stone position - stays centered when modal is open
@@ -75,9 +76,10 @@
   // =====================
   // STONE 1 -> STONE 2 TRANSITION
   // =====================
-  // Transition happens around scrollProgress 0.45 to 0.55 (centered at 0.50 where stone switches)
-  const STONE2_TRANSITION_START = 0.45;
-  const STONE2_TRANSITION_END = 0.55;
+  // Blank section is 0.38-0.54, transition happens at end of blank section
+  // Transition: 0.48 to 0.58 (Stone 1 goes up, Stone 2 comes from below)
+  const STONE2_TRANSITION_START = 0.48;
+  const STONE2_TRANSITION_END = 0.58;
 
   $: stone2TransitionProgress = (() => {
     if (scrollProgress < STONE2_TRANSITION_START) return 0;

@@ -138,7 +138,7 @@
   $: isInCave = currentSection > 0;
   $: isViewingStone = currentSection >= 1;
 
-  // Handle scroll - Simple 5 sections (Igloo + 4 Stones)
+  // Handle scroll - 6 sections (Igloo + Stone1 + Blank + Stone2 + Stone3 + Stone4)
   function handleScroll() {
     const scrollContainer = document.querySelector('.scroll-container');
     if (!scrollContainer) return;
@@ -147,13 +147,13 @@
     const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
     scrollProgress = scrollTop / scrollHeight;
 
-    // 5 sections with longer hero for transition visibility
-    // Hero: 0-30%, Stone1: 30-50%, Stone2: 50-70%, Stone3: 70-85%, Stone4: 85-100%
-    if (scrollProgress < 0.30) currentSection = 0;
-    else if (scrollProgress < 0.50) currentSection = 1;
-    else if (scrollProgress < 0.70) currentSection = 2;
-    else if (scrollProgress < 0.85) currentSection = 3;
-    else currentSection = 4;
+    // 6 sections: Hero(150vh) + Stone1(100vh) + Blank(100vh) + Stone2(100vh) + Stone3(100vh) + Stone4(100vh) = 650vh
+    // Hero: 0-23%, Stone1: 23-38%, Blank: 38-54%, Stone2: 54-69%, Stone3: 69-85%, Stone4: 85-100%
+    if (scrollProgress < 0.23) currentSection = 0;      // Hero/Igloo
+    else if (scrollProgress < 0.54) currentSection = 1; // Stone 1 (includes blank section - stone stays visible)
+    else if (scrollProgress < 0.69) currentSection = 2; // Stone 2
+    else if (scrollProgress < 0.85) currentSection = 3; // Stone 3
+    else currentSection = 4;                            // Stone 4
   }
 
   onMount(() => {
@@ -278,6 +278,7 @@
   <div class="scroll-container">
     <section class="section" id="hero" style="height: 150vh;"></section>
     <section class="section" id="stone-1" style="height: 100vh;"></section>
+    <section class="section" id="blank-transition" style="height: 100vh;"></section>
     <section class="section" id="stone-2" style="height: 100vh;"></section>
     <section class="section" id="stone-3" style="height: 100vh;"></section>
     <section class="section" id="stone-4" style="height: 100vh;"></section>
