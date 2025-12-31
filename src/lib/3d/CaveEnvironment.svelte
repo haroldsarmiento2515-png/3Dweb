@@ -72,6 +72,69 @@
     return 0;
   })();
 
+  // =====================
+  // STONE 1 -> STONE 2 TRANSITION
+  // =====================
+  // Transition happens around scrollProgress 0.45 to 0.55 (centered at 0.50 where stone switches)
+  const STONE2_TRANSITION_START = 0.45;
+  const STONE2_TRANSITION_END = 0.55;
+
+  $: stone2TransitionProgress = (() => {
+    if (scrollProgress < STONE2_TRANSITION_START) return 0;
+    if (scrollProgress > STONE2_TRANSITION_END) return 1;
+    return (scrollProgress - STONE2_TRANSITION_START) / (STONE2_TRANSITION_END - STONE2_TRANSITION_START);
+  })();
+
+  // Second stone lift animation - rises dramatically from below during transition
+  $: secondStoneLiftOffset = (() => {
+    if (stone2TransitionProgress < 1) {
+      // Ease-out cubic curve for smooth deceleration as stone arrives
+      const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 3);
+      return -12 * (1 - easeOut);  // Starts at -12, ends at 0
+    }
+    return 0;
+  })();
+
+  // Second stone scale animation - grows dramatically as it rises
+  $: secondStoneScaleBoost = (() => {
+    if (stone2TransitionProgress < 1) {
+      const easeOut = 1 - Math.pow(1 - stone2TransitionProgress, 2);
+      return 0.2 + (0.8 * easeOut);  // Starts at 0.2 (small), ends at 1.0
+    }
+    return 1;
+  })();
+
+  // Second stone rotation animation - dramatic rotation as it rises
+  $: secondStoneRotationBoost = (() => {
+    if (stone2TransitionProgress < 1) {
+      return (1 - stone2TransitionProgress) * Math.PI;  // Full 180 degree rotation
+    }
+    return 0;
+  })();
+
+  // First stone exit animation - stone 1 sinks and shrinks when transitioning to stone 2
+  $: firstStoneExitOffset = (() => {
+    if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
+      const easeIn = Math.pow(stone2TransitionProgress, 2);
+      return -8 * easeIn;  // Sinks down
+    }
+    return 0;
+  })();
+
+  $: firstStoneExitScale = (() => {
+    if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
+      return 1 - (0.6 * stone2TransitionProgress);  // Shrinks to 0.4
+    }
+    return stone2TransitionProgress >= 1 ? 0.4 : 1;
+  })();
+
+  $: firstStoneExitRotation = (() => {
+    if (stone2TransitionProgress > 0 && stone2TransitionProgress < 1) {
+      return stone2TransitionProgress * Math.PI * 0.5;  // Rotates as it exits
+    }
+    return 0;
+  })();
+
   // Target zoom based on modal state (zoom in deep for "inside rock" illusion)
   $: {
     const newTarget = modalOpen ? 3.5 : 1;
@@ -217,10 +280,37 @@
   {@const stoneVisible = index === activeStoneIndex}
 
   {#if stoneVisible}
-    <!-- Apply lift animation only to first stone (index 0) during transition -->
-    {@const liftOffset = index === 0 ? firstStoneLiftOffset : 0}
-    {@const scaleMultiplier = index === 0 ? firstStoneScaleBoost : 1}
-    {@const rotationBoost = index === 0 ? firstStoneRotationBoost : 0}
+    <!-- Apply transition animations based on stone index -->
+    {@const liftOffset = (() => {
+      if (index === 0) {
+        // First stone: entry animation + exit animation when transitioning to stone 2
+        return firstStoneLiftOffset + firstStoneExitOffset;
+      }
+      if (index === 1) {
+        // Second stone: entry animation during stone1->stone2 transition
+        return secondStoneLiftOffset;
+      }
+      return 0;
+    })()}
+    {@const scaleMultiplier = (() => {
+      if (index === 0) {
+        // First stone: entry scale + exit scale
+        return firstStoneScaleBoost * firstStoneExitScale;
+      }
+      if (index === 1) {
+        return secondStoneScaleBoost;
+      }
+      return 1;
+    })()}
+    {@const rotationBoost = (() => {
+      if (index === 0) {
+        return firstStoneRotationBoost + firstStoneExitRotation;
+      }
+      if (index === 1) {
+        return secondStoneRotationBoost;
+      }
+      return 0;
+    })()}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
     <!-- Main rock mesh - loaded GLTF model -->
