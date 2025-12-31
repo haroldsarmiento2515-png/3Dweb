@@ -125,11 +125,13 @@
     position: relative;
     max-width: 580px;
     width: 100%;
-    padding: 2rem;
+    padding: 0;
     text-align: center;
     max-height: 85vh;
     overflow-y: auto;
-    background: transparent;
+    background: none;
+    border: none;
+    box-shadow: none;
   }
 
   /* Hide scrollbar but keep functionality */
