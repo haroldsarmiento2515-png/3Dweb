@@ -6,6 +6,8 @@
   import Igloo from './Igloo.svelte';
   import Mountains from './Mountains.svelte';
   import CaveEnvironment from './CaveEnvironment.svelte';
+  import BackgroundParticles from './BackgroundParticles.svelte';
+  import BlurPostProcessing from './BlurPostProcessing.svelte';
 
   // Enable interactivity - must be called inside a Canvas child component
   interactivity({
@@ -114,6 +116,9 @@
 <!-- STONES SCENE - Normal vertical scroll -->
 <!-- ===================== -->
 {#if platformVisible}
+  <!-- Background particles -->
+  <BackgroundParticles opacity={platformOpacity} particleCount={300} areaSize={40} />
+
   <CaveEnvironment
     opacity={platformOpacity}
     {scrollProgress}
@@ -125,4 +130,7 @@
     on:stoneClick={handleStoneClick}
     on:zoomComplete={handleZoomComplete}
   />
+
+  <!-- Blur post-processing for depth-of-field effect -->
+  <BlurPostProcessing enabled={true} focusDistance={8} aperture={0.003} maxblur={0.015} />
 {/if}
