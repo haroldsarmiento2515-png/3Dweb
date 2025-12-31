@@ -47,18 +47,18 @@
   $: platformVisible = transitionProgress > 0.01;
 
   // =====================
-  // IGLOO SCENE TRANSFORM (shrinks and moves down during transition)
+  // IGLOO SCENE TRANSFORM (shrinks and moves UP/away as camera descends)
   // =====================
   $: iglooScale = 1 - transitionProgress * 0.6;  // Shrinks from 1 to 0.4
-  $: iglooY = -transitionProgress * 20;  // Moves down significantly
-  $: iglooZ = 0;  // Stays in place on Z
+  $: iglooY = transitionProgress * 15;  // Moves UP (away from descending camera)
+  $: iglooZ = -transitionProgress * 10;  // Moves back
 
   // =====================
   // CAMERA POSITIONS
-  // Camera rises UP during transition (increases Y significantly)
+  // Camera goes DOWN during transition (decreases Y - descending)
   // =====================
   const heroCamPos = { x: 9, y: 5, z: 9 };
-  const transitionCamPos = { x: 5, y: 25, z: 8 };  // Camera rises UP to y=25
+  const transitionCamPos = { x: 3, y: -10, z: 6 };  // Camera goes DOWN to y=-10
   const platformCamPos = { x: 0, y: 2, z: 4 };
   const platformDeepPos = { x: 0, y: 1.5, z: -24 };
 
@@ -84,7 +84,7 @@
       cameraY = heroCamPos.y + (mousePosition.y - 0.5) * 1;
       cameraZ = heroCamPos.z;
     } else if (scrollProgress < TRANSITION_END) {
-      // Transition - camera rises UP as igloo shrinks and moves down
+      // Transition - camera goes DOWN as igloo shrinks and moves up/away
       const t = smoothTransition;
       cameraX = lerp(heroCamPos.x, transitionCamPos.x, t) + (mousePosition.x - 0.5) * (2 - t);
       cameraY = lerp(heroCamPos.y, transitionCamPos.y, t) + (mousePosition.y - 0.5) * (1 - t * 0.5);
@@ -105,8 +105,8 @@
     }
   }
 
-  // Camera look target - looks down at igloo during transition, then forward
-  $: lookAtY = lerp(0, 1.5, smoothTransition);
+  // Camera look target - looks up at igloo during transition, then forward
+  $: lookAtY = lerp(2, 1.5, smoothTransition);
   $: lookAtZ = lerp(0, -5 * platformDepthProgress, transitionProgress);
 
   useTask(() => {
