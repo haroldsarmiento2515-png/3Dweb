@@ -242,23 +242,23 @@
   <!-- Scroll Container - Simple sections: Igloo + 4 Stones -->
   <div class="scroll-container relative" style="z-index: 0; pointer-events: none;">
     <section class="section" id="hero">
-      <div style="height: 100vh;"></div>
+      <div style="height: 50vh;"></div>
     </section>
 
     <section class="section" id="stone-1">
-      <div style="height: 100vh;"></div>
+      <div style="height: 50vh;"></div>
     </section>
 
     <section class="section" id="stone-2">
-      <div style="height: 100vh;"></div>
+      <div style="height: 50vh;"></div>
     </section>
 
     <section class="section" id="stone-3">
-      <div style="height: 100vh;"></div>
+      <div style="height: 50vh;"></div>
     </section>
 
     <section class="section" id="stone-4">
-      <div style="height: 100vh;"></div>
+      <div style="height: 50vh;"></div>
     </section>
   </div>
 
