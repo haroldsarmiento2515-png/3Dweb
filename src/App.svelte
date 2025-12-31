@@ -18,17 +18,12 @@
   let soundEnabled = false;
   let showUI = true;
 
-  // Section names for UI display
+  // Section names for UI display - Simple: Igloo + 4 Stones
   const sectionNames = [
     'Surface',
-    'Descending',
-    'Portal',
     'Specimen 01',
-    'Traveling',
     'Specimen 02',
-    'Traveling',
     'Specimen 03',
-    'Traveling',
     'Specimen 04'
   ];
 
@@ -107,22 +102,13 @@
   }
 
   // Get which stone is active (0-3) based on section
-  $: currentStoneIndex = (() => {
-    if (currentSection === 3) return 0;
-    if (currentSection === 5) return 1;
-    if (currentSection === 7) return 2;
-    if (currentSection === 9) return 3;
-    if (currentSection === 4) return 1;
-    if (currentSection === 6) return 2;
-    if (currentSection === 8) return 3;
-    return 0;
-  })();
-  
-  $: currentStone = stones[currentStoneIndex];
-  $: isInCave = scrollProgress > 0.06;
-  $: isViewingStone = [3, 5, 7, 9].includes(currentSection);
+  $: currentStoneIndex = Math.max(0, currentSection - 1);
 
-  // Handle scroll
+  $: currentStone = stones[currentStoneIndex];
+  $: isInCave = currentSection > 0;
+  $: isViewingStone = currentSection >= 1;
+
+  // Handle scroll - Simple 5 sections (Igloo + 4 Stones)
   function handleScroll() {
     const scrollContainer = document.querySelector('.scroll-container');
     if (!scrollContainer) return;
@@ -131,16 +117,12 @@
     const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
     scrollProgress = scrollTop / scrollHeight;
 
-    if (scrollProgress < 0.02) currentSection = 0;
-    else if (scrollProgress < 0.05) currentSection = 1;
-    else if (scrollProgress < 0.09) currentSection = 2;
-    else if (scrollProgress < 0.20) currentSection = 3;
-    else if (scrollProgress < 0.30) currentSection = 4;
-    else if (scrollProgress < 0.45) currentSection = 5;
-    else if (scrollProgress < 0.55) currentSection = 6;
-    else if (scrollProgress < 0.70) currentSection = 7;
-    else if (scrollProgress < 0.80) currentSection = 8;
-    else currentSection = 9;
+    // 5 sections: 0=Igloo, 1=Stone1, 2=Stone2, 3=Stone3, 4=Stone4
+    if (scrollProgress < 0.20) currentSection = 0;
+    else if (scrollProgress < 0.40) currentSection = 1;
+    else if (scrollProgress < 0.60) currentSection = 2;
+    else if (scrollProgress < 0.80) currentSection = 3;
+    else currentSection = 4;
   }
 
   onMount(() => {
@@ -236,13 +218,13 @@
           </span>
         </div>
 
-        <!-- Right: Progress indicator (10 dots) -->
+        <!-- Right: Progress indicator (5 dots) -->
         <div class="ui-element flex gap-1.5">
-          {#each Array(10) as _, i}
+          {#each Array(5) as _, i}
             <div
               class="progress-dot"
               class:active={currentSection >= i}
-              class:stone-dot={[3, 5, 7, 9].includes(i)}
+              class:stone-dot={i >= 1}
             ></div>
           {/each}
         </div>
@@ -257,46 +239,26 @@
     {/if}
   {/if}
 
-  <!-- Scroll Container -->
+  <!-- Scroll Container - Simple sections: Igloo + 4 Stones -->
   <div class="scroll-container relative" style="z-index: 0; pointer-events: none;">
     <section class="section" id="hero">
-      <div style="height: 50vh;"></div>
-    </section>
-
-    <section class="section" id="entrance">
-      <div style="height: 75vh;"></div>
-    </section>
-
-    <section class="section" id="portal">
       <div style="height: 100vh;"></div>
     </section>
 
     <section class="section" id="stone-1">
-      <div style="height: 225vh;"></div>
-    </section>
-
-    <section class="section" id="travel-1">
-      <div style="height: 150vh;"></div>
+      <div style="height: 100vh;"></div>
     </section>
 
     <section class="section" id="stone-2">
-      <div style="height: 225vh;"></div>
-    </section>
-
-    <section class="section" id="travel-2">
-      <div style="height: 150vh;"></div>
+      <div style="height: 100vh;"></div>
     </section>
 
     <section class="section" id="stone-3">
-      <div style="height: 225vh;"></div>
-    </section>
-
-    <section class="section" id="travel-3">
-      <div style="height: 150vh;"></div>
+      <div style="height: 100vh;"></div>
     </section>
 
     <section class="section" id="stone-4">
-      <div style="height: 500vh;"></div>
+      <div style="height: 100vh;"></div>
     </section>
   </div>
 

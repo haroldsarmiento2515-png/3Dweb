@@ -23,9 +23,9 @@
 
   // =====================
   // SIMPLE SCROLL - No transitions, instant switch
-  // Hero (0-10%), then stones (10-100%)
+  // Hero (0-20%), then stones (20-100%)
   // =====================
-  const HERO_END = 0.10;
+  const HERO_END = 0.20;
 
   // Scene visibility - instant switch, no fade
   $: iglooVisible = scrollProgress < HERO_END;
