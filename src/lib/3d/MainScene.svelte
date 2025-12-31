@@ -29,24 +29,23 @@
 
   // =====================
   // TRANSITION ZONE - Overlap for smooth igloo-to-stone transition
-  // Transition happens during scroll 10% to 35% for clear visibility
+  // Transition happens during scroll 8% to 30% for clear visibility
   // =====================
-  const TRANSITION_START = 0.10;  // When transition begins
-  const TRANSITION_END = 0.35;    // When transition completes
-  const HERO_END = 0.25;          // Hero section ends
+  const TRANSITION_START = 0.08;  // When transition begins
+  const TRANSITION_END = 0.30;    // When transition completes
 
   // Scene visibility - overlap during transition
-  $: iglooVisible = scrollProgress < TRANSITION_END;
+  $: iglooVisible = scrollProgress < TRANSITION_END + 0.05;
   $: platformVisible = scrollProgress >= TRANSITION_START;
 
   // Calculate transition progress (0 at start, 1 at end)
   $: iglooTransitionProgress = Math.min(1, Math.max(0, (scrollProgress - TRANSITION_START) / (TRANSITION_END - TRANSITION_START)));
 
   // Igloo fades during transition
-  $: iglooOpacity = Math.max(0, 1 - iglooTransitionProgress * 1.2);
+  $: iglooOpacity = Math.max(0, 1 - iglooTransitionProgress * 1.5);
 
-  // Platform fades in during transition
-  $: platformOpacity = Math.min(1, iglooTransitionProgress * 1.5);
+  // Platform fades in during transition (starts after 30% of transition)
+  $: platformOpacity = Math.min(1, Math.max(0, (iglooTransitionProgress - 0.3) / 0.7));
 
   // =====================
   // FIXED CAMERA - Stationary, facing forward

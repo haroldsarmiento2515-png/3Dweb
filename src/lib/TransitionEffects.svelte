@@ -4,8 +4,8 @@
   export let scrollProgress = 0;
 
   // Transition timing - matches MainScene.svelte transition zone
-  const TRANSITION_START = 0.10;
-  const TRANSITION_END = 0.35;
+  const TRANSITION_START = 0.08;
+  const TRANSITION_END = 0.30;
 
   // Calculate effect intensity based on scroll progress
   $: transitionProgress = Math.min(1, Math.max(0,
@@ -13,22 +13,22 @@
   ));
 
   // Peak intensity around middle, then fade out smoothly
-  $: effectIntensity = Math.sin(transitionProgress * Math.PI) * 0.8;
+  $: effectIntensity = Math.sin(transitionProgress * Math.PI);
 
   // Is the effect active?
   $: isActive = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END;
 
-  // Chromatic aberration offset (pixels) - subtle ice-like distortion
-  $: aberrationOffset = effectIntensity * 12;
+  // Chromatic aberration offset (pixels) - dramatic distortion
+  $: aberrationOffset = effectIntensity * 25;
 
-  // Noise opacity - subtle frost texture
-  $: noiseOpacity = effectIntensity * 0.25;
+  // Noise opacity - visible frost texture
+  $: noiseOpacity = effectIntensity * 0.5;
 
-  // Glitch bar count - subtle displacement lines
-  $: glitchBarCount = Math.floor(effectIntensity * 6);
+  // Glitch bar count - more displacement lines
+  $: glitchBarCount = Math.floor(effectIntensity * 10);
 
-  // Frost/fog intensity - icy mist effect
-  $: fogOpacity = effectIntensity * 0.5;
+  // Frost/fog intensity - strong icy mist effect
+  $: fogOpacity = effectIntensity * 0.85;
 
   // Generate random glitch bars
   let glitchBars = [];
