@@ -3,32 +3,32 @@
 
   export let scrollProgress = 0;
 
-  // Transition timing - extended to cover first stone appearance
-  const TRANSITION_START = 0.05;
-  const TRANSITION_END = 0.18;  // Extended to overlap with first stone section
+  // Transition timing - matches MainScene.svelte transition zone
+  const TRANSITION_START = 0.10;
+  const TRANSITION_END = 0.35;
 
   // Calculate effect intensity based on scroll progress
   $: transitionProgress = Math.min(1, Math.max(0,
     (scrollProgress - TRANSITION_START) / (TRANSITION_END - TRANSITION_START)
   ));
 
-  // Peak intensity around middle, then fade out
-  $: effectIntensity = Math.sin(transitionProgress * Math.PI);
+  // Peak intensity around middle, then fade out smoothly
+  $: effectIntensity = Math.sin(transitionProgress * Math.PI) * 0.8;
 
   // Is the effect active?
-  $: isActive = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END + 0.02;
+  $: isActive = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END;
 
-  // Chromatic aberration offset (pixels)
-  $: aberrationOffset = effectIntensity * 8;
+  // Chromatic aberration offset (pixels) - subtle ice-like distortion
+  $: aberrationOffset = effectIntensity * 12;
 
-  // Noise opacity
-  $: noiseOpacity = effectIntensity * 0.4;
+  // Noise opacity - subtle frost texture
+  $: noiseOpacity = effectIntensity * 0.25;
 
-  // Glitch bar count (more at peak intensity)
-  $: glitchBarCount = Math.floor(effectIntensity * 12);
+  // Glitch bar count - subtle displacement lines
+  $: glitchBarCount = Math.floor(effectIntensity * 6);
 
-  // Fog intensity - heavy fog to create visual gap during stone transmission
-  $: fogOpacity = effectIntensity * 0.85;
+  // Frost/fog intensity - icy mist effect
+  $: fogOpacity = effectIntensity * 0.5;
 
   // Generate random glitch bars
   let glitchBars = [];
@@ -219,7 +219,7 @@
     );
   }
 
-  /* Fog Layers */
+  /* Frost/Ice Fog Layers */
   .dig-fog {
     position: absolute;
     inset: 0;
@@ -229,10 +229,10 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at center,
-      rgba(200, 210, 220, 0.6) 0%,
-      rgba(190, 200, 210, 0.75) 30%,
-      rgba(180, 190, 200, 0.85) 60%,
-      rgba(170, 180, 190, 0.95) 100%
+      rgba(180, 220, 240, 0.3) 0%,
+      rgba(150, 200, 230, 0.4) 30%,
+      rgba(120, 180, 220, 0.5) 60%,
+      rgba(100, 160, 200, 0.6) 100%
     );
   }
 
