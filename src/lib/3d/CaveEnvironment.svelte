@@ -19,32 +19,20 @@
 
   let time = 0;
 
-  // Stone sections mapping:
-  // Section 3: Stone 1, Section 5: Stone 2, Section 7: Stone 3, Section 9: Stone 4
-  // Travel sections: 4 (1→2), 6 (2→3), 8 (3→4)
+  // =====================
+  // NORMAL SCROLL - Show one stone at a time, centered
+  // =====================
 
-  // Calculate which stone is currently active
+  // Calculate which stone is currently active based on scroll
   $: activeStoneIndex = (() => {
-    if (currentSection === 3) return 0;
-    if (currentSection === 4) return 0;
-    if (currentSection === 5) return 1;
-    if (currentSection === 6) return 1;
-    if (currentSection === 7) return 2;
-    if (currentSection === 8) return 2;
-    if (currentSection === 9) return 3;
-    return 0;
+    if (scrollProgress < 0.30) return 0;
+    if (scrollProgress < 0.50) return 1;
+    if (scrollProgress < 0.70) return 2;
+    return 3;
   })();
 
-  // Stone positions - each stone centered for its section
-  const stonePositions = [
-    { x: 0, y: 1.5, z: 0 },
-    { x: 0, y: 1.5, z: -7 },
-    { x: 0, y: 1.5, z: -14 },
-    { x: 0, y: 1.5, z: -21 }
-  ];
-
-  // Stones visible whenever scene is rendering
-  $: stonesVisible = true;
+  // All stones at same center position (only one visible at a time)
+  const stonePosition = { x: 0, y: 1.5, z: 0 };
 
   // Stone hover states
   let hoveredStone = -1;
@@ -141,8 +129,8 @@
 </script>
 
 <!-- Flat platform floor -->
-<T.Mesh rotation.x={-Math.PI / 2} position.y={-0.5} position.z={-10} receiveShadow>
-  <T.PlaneGeometry args={[80, 120]} />
+<T.Mesh rotation.x={-Math.PI / 2} position.y={-0.5} position.z={0} receiveShadow>
+  <T.PlaneGeometry args={[40, 40]} />
   <T.MeshStandardMaterial
     color={0x8a8a8a}
     roughness={0.85}
@@ -152,24 +140,18 @@
   />
 </T.Mesh>
 
-<!-- Main clickable stones with labels -->
+<!-- Main clickable stones - ONE AT A TIME, centered -->
 {#each stones as stone, index}
-  {@const pos = stonePositions[index] || { x: 0, y: 1.5, z: 0 }}
   {@const isHovered = hoveredStone === index}
   {@const floatY = Math.sin(time * 0.4 + index * 1.5) * 0.06}
   {@const rotY = time * 0.12 + index * Math.PI * 0.5}
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
 
-  <!-- Stone visibility based on section - first stone visible earlier during transition -->
-  {@const stoneVisible = (
-    (index === 0 && currentSection >= 2 && currentSection <= 4) ||
-    (index === 1 && currentSection >= 4 && currentSection <= 6) ||
-    (index === 2 && currentSection >= 6 && currentSection <= 8) ||
-    (index === 3 && currentSection >= 8 && currentSection <= 10)
-  )}
+  <!-- Only show the active stone -->
+  {@const stoneVisible = index === activeStoneIndex}
 
   {#if stoneVisible}
-    <T.Group position={[pos.x, pos.y + floatY, pos.z]}>
+    <T.Group position={[stonePosition.x, stonePosition.y + floatY, stonePosition.z]}>
 
     <!-- Main rock mesh - loaded GLTF model -->
     {#if $rockGltf}
