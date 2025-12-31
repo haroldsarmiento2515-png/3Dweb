@@ -249,41 +249,55 @@
         decay={2}
       />
 
-      <!-- HTML Labels - Left Side Info Panel (faces screen directly) -->
+      <!-- HTML Labels - Top Left with connecting line -->
       <HTML
-        position={[-4.5, 0, 0]}
+        position={[-3.8, 2.2, 0]}
         center
         occlude={false}
         style="pointer-events: none;"
       >
-        <div class="info-panel left-panel" class:hovered={isHovered}>
-          <div class="info-header">
-            <span class="info-id">PORTFOLIO_CO_{String(index + 1).padStart(2, '0')}</span>
-          </div>
+        <div class="stone-info top-left" class:hovered={isHovered}>
+          <div class="info-id">PORTFOLIO_CO_{String(index + 1).padStart(2, '0')}</div>
           <div class="info-name">{stone.name.toUpperCase().replace(' ', '_')}</div>
-          <div class="info-divider"></div>
-          <div class="info-date">D {formatDate()}</div>
+          <!-- Connecting line -->
+          <svg class="connector-line top-left-line" width="120" height="60" viewBox="0 0 120 60">
+            <line x1="0" y1="0" x2="100" y2="50" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+            <circle cx="100" cy="50" r="3" fill="rgba(255,255,255,0.6)"/>
+          </svg>
         </div>
       </HTML>
 
-      <!-- HTML Labels - Right Side Info Panel (faces screen directly) -->
+      <!-- HTML Labels - Right Side Temperature -->
       <HTML
-        position={[4.5, 0, 0]}
+        position={[4.2, 0.8, 0]}
         center
         occlude={false}
         style="pointer-events: none;"
       >
-        <div class="info-panel right-panel" class:hovered={isHovered}>
-          <div class="info-row">
-            <span class="info-label">TEMP</span>
-            <span class="info-value">{(25 + Math.sin(index * 2) * 8).toFixed(2)}</span>
+        <div class="stone-info right-side" class:hovered={isHovered}>
+          <div class="temp-row">
+            <span class="temp-label">TEMP</span>
+            <span class="temp-value">{(25 + Math.sin(index * 2) * 8).toFixed(2)}°</span>
           </div>
-          <div class="info-row">
-            <span class="info-label"></span>
-            <span class="info-value secondary">+{(-3 + Math.cos(index * 2) * 4).toFixed(2)}</span>
-          </div>
-          <div class="info-divider"></div>
-          <div class="info-action">CLICK TO EXPLORE</div>
+          <div class="temp-secondary">+{(Math.abs(-3 + Math.cos(index * 2) * 4)).toFixed(2)}</div>
+        </div>
+      </HTML>
+
+      <!-- HTML Labels - Bottom with date and CTA -->
+      <HTML
+        position={[1.5, -2.0, 0]}
+        center
+        occlude={false}
+        style="pointer-events: none;"
+      >
+        <div class="stone-info bottom-info" class:hovered={isHovered}>
+          <!-- Connecting line from stone -->
+          <svg class="connector-line bottom-line" width="80" height="50" viewBox="0 0 80 50">
+            <line x1="0" y1="50" x2="60" y2="10" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+            <circle cx="0" cy="50" r="3" fill="rgba(255,255,255,0.6)"/>
+          </svg>
+          <div class="date-text">D {formatDate()}</div>
+          <div class="cta-text">CLICK TO EXPLORE</div>
         </div>
       </HTML>
 
@@ -292,111 +306,119 @@
 {/each}
 
 <style>
-  /* Info Panel - Clean flat layout facing screen */
-  :global(.info-panel) {
+  /* Stone Info - Clean floating labels with connecting lines */
+  :global(.stone-info) {
     font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-    color: rgba(255, 255, 255, 0.8);
-    padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(4px);
-    min-width: 140px;
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.3s ease;
   }
 
-  :global(.info-panel.hovered) {
+  :global(.stone-info.hovered) {
     color: rgba(255, 255, 255, 1);
-    background: rgba(0, 0, 0, 0.25);
-    border-color: rgba(255, 255, 255, 0.3);
   }
 
-  :global(.info-panel.left-panel) {
+  /* Top Left - Portfolio ID and Name */
+  :global(.stone-info.top-left) {
     text-align: left;
-  }
-
-  :global(.info-panel.right-panel) {
-    text-align: right;
-  }
-
-  :global(.info-header) {
-    margin-bottom: 4px;
+    position: relative;
   }
 
   :global(.info-id) {
-    font-size: 9px;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  :global(.info-panel.hovered .info-id) {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  :global(.info-name) {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 8px;
-  }
-
-  :global(.info-panel.hovered .info-name) {
-    color: rgba(255, 255, 255, 1);
-  }
-
-  :global(.info-divider) {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 8px 0;
-  }
-
-  :global(.info-panel.hovered .info-divider) {
-    background: rgba(255, 255, 255, 0.35);
-  }
-
-  :global(.info-date) {
     font-size: 10px;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  :global(.info-row) {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 16px;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.7);
     margin-bottom: 2px;
   }
 
-  :global(.info-label) {
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    color: rgba(255, 255, 255, 0.5);
+  :global(.stone-info.hovered .info-id) {
+    color: rgba(255, 255, 255, 0.9);
   }
 
-  :global(.info-value) {
+  :global(.info-name) {
     font-size: 14px;
     font-weight: 500;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.95);
   }
 
-  :global(.info-value.secondary) {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.55);
-  }
-
-  :global(.info-panel.hovered .info-value) {
+  :global(.stone-info.hovered .info-name) {
     color: rgba(255, 255, 255, 1);
   }
 
-  :global(.info-action) {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: rgba(255, 255, 255, 0.6);
+  /* Connecting lines */
+  :global(.connector-line) {
+    position: absolute;
+    overflow: visible;
+  }
+
+  :global(.connector-line.top-left-line) {
+    top: 100%;
+    left: 0;
     margin-top: 4px;
   }
 
-  :global(.info-panel.hovered .info-action) {
+  :global(.connector-line.bottom-line) {
+    position: absolute;
+    top: -45px;
+    left: -60px;
+  }
+
+  /* Right Side - Temperature */
+  :global(.stone-info.right-side) {
+    text-align: right;
+  }
+
+  :global(.temp-row) {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    justify-content: flex-end;
+  }
+
+  :global(.temp-label) {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  :global(.temp-value) {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  :global(.stone-info.hovered .temp-value) {
+    color: rgba(255, 255, 255, 1);
+  }
+
+  :global(.temp-secondary) {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  /* Bottom - Date and CTA */
+  :global(.stone-info.bottom-info) {
+    text-align: left;
+    position: relative;
+  }
+
+  :global(.date-text) {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 4px;
+  }
+
+  :global(.cta-text) {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  :global(.stone-info.hovered .cta-text) {
     color: rgba(255, 255, 255, 0.95);
   }
 </style>
