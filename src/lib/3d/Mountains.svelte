@@ -63,28 +63,28 @@
 
 {#if isLoaded && mountainScene}
   <!-- Main mountain - center back -->
-  <T.Group 
-    position={[-5, -2, -15]}
-    scale={[0.4, 0.4, 0.4]}
-    rotation={[-0.1, Math.PI, 0]}
+  <T.Group
+    position={[0, -8, -35]}
+    scale={[80, 80, 80]}
+    rotation={[0, 0, 0]}
   >
     <T is={mountainScene} />
   </T.Group>
-  
+
   <!-- Second mountain - right side -->
-  <T.Group 
-    position={[15, -3, -20]}
-    scale={[0.35, 0.35, 0.35]}
-    rotation={[-0.1, Math.PI - 0.3, 0]}
+  <T.Group
+    position={[35, -10, -45]}
+    scale={[70, 70, 70]}
+    rotation={[0, 0.3, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
-  
+
   <!-- Third mountain - left side -->
-  <T.Group 
-    position={[-20, -2, -12]}
-    scale={[0.3, 0.3, 0.3]}
-    rotation={[-0.1, Math.PI + 0.4, 0]}
+  <T.Group
+    position={[-35, -9, -40]}
+    scale={[65, 65, 65]}
+    rotation={[0, -0.4, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
