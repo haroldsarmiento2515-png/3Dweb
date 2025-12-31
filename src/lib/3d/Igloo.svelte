@@ -76,11 +76,11 @@
     position={[0, positionOffsetY, positionOffsetZ]}
     scale={[shrinkScale, shrinkScale, shrinkScale]}
   >
-    <!-- Inner group with original igloo positioning -->
+    <!-- Inner group - CENTERED igloo for visible transition -->
     <T.Group
-      position={[4, -0.3, -4]}
-      scale={[0.3, 0.3, 0.3]}
-      rotation={[Math.PI /-1, 0.1, Math.PI / 1]}
+      position={[0, 0.5, 0]}
+      scale={[0.4, 0.4, 0.4]}
+      rotation={[0, Math.PI * 0.25, 0]}
     >
       <T is={$iglooGltf.scene} />
     </T.Group>
@@ -104,7 +104,7 @@
   <!-- Spotlight on igloo -->
   <T.SpotLight
     position={[0, 8, 5]}
-    target-position={[0, , 0]}
+    target-position={[0, 1, 0]}
     angle={0.6}
     penumbra={0.5}
     intensity={2}
@@ -112,26 +112,26 @@
     castShadow
   />
   
-  <!-- Door glow effect -->
+  <!-- Door glow effect - positioned relative to centered igloo -->
   <T.Mesh
     geometry={doorGeometry}
     material={iceGlowMaterial}
-    position={[1.2, 0.6, 1.2]}
-    rotation={[0, Math.PI * 0.75, 0]}
+    position={[0.5, 1.0, 0.5]}
+    rotation={[0, Math.PI * 0.25, 0]}
   />
-  
+
   <!-- Door glow light source -->
   <T.PointLight
-    position={[1.5, 0.6, 1.5]}
+    position={[0.6, 1.0, 0.6]}
     color={0x66e5ff}
     intensity={2 * opacity}
     distance={5}
     decay={2}
   />
-  
+
   <!-- Interior glow -->
   <T.PointLight
-    position={[0, 0.8, 0]}
+    position={[0, 1.2, 0]}
     color={0x4dc8e8}
     intensity={1 * opacity}
     distance={4}
