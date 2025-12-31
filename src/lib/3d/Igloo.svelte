@@ -6,21 +6,6 @@
   export let scrollProgress = 0;
   export let visible = true;
   export let opacity = 1;
-  export let transitionProgress = 0;  // 0 = no transition, 1 = fully transitioned
-
-  // Ease-out for smoother deceleration
-  $: easeOutProgress = 1 - Math.pow(1 - transitionProgress, 3);
-
-  // Calculate shrink effect - igloo shrinks dramatically as we "walk away"
-  // Scale goes from 1.0 to 0.05 with ease-out curve
-  $: shrinkScale = Math.max(0.05, 1 - (easeOutProgress * 0.95));
-
-  // Position offset - igloo moves back significantly and sinks as we walk away
-  $: positionOffsetZ = -easeOutProgress * 25;  // Move far back into distance
-  $: positionOffsetY = -easeOutProgress * 5;   // Sink down more noticeably
-
-  // Rotation as it moves away
-  $: rotationOffset = easeOutProgress * 0.3;
 
   let time = 0;
   
@@ -74,21 +59,12 @@
 </script>
 
 {#if visible && $iglooGltf}
-  <!-- Outer group for transition animation (shrink + move back + rotate) -->
-  <T.Group
-    position={[0, positionOffsetY, positionOffsetZ]}
-    scale={[shrinkScale, shrinkScale, shrinkScale]}
-    rotation.x={rotationOffset * 0.5}
-    rotation.y={rotationOffset}
+  <T.Group 
+position={[1, -3, -1]}
+scale={[0.4, 0.4, 0.4]}
+rotation={[Math.PI /-1,-4.1, Math.PI / 1]}
   >
-    <!-- Inner group - CENTERED igloo for visible transition -->
-    <T.Group
-      position={[0, 0.5, 0]}
-      scale={[0.4, 0.4, 0.4]}
-      rotation={[0, Math.PI * 0.25, 0]}
-    >
-      <T is={$iglooGltf.scene} />
-    </T.Group>
+    <T is={$iglooGltf.scene} />
   </T.Group>
   
   <!-- Extra lighting for igloo -->
@@ -117,26 +93,26 @@
     castShadow
   />
   
-  <!-- Door glow effect - positioned relative to centered igloo -->
+  <!-- Door glow effect -->
   <T.Mesh
     geometry={doorGeometry}
     material={iceGlowMaterial}
-    position={[0.5, 1.0, 0.5]}
-    rotation={[0, Math.PI * 0.25, 0]}
+    position={[1.2, 0.6, 1.2]}
+    rotation={[0, Math.PI * 0.75, 0]}
   />
-
+  
   <!-- Door glow light source -->
   <T.PointLight
-    position={[0.6, 1.0, 0.6]}
+    position={[1.5, 0.6, 1.5]}
     color={0x66e5ff}
     intensity={2 * opacity}
     distance={5}
     decay={2}
   />
-
+  
   <!-- Interior glow -->
   <T.PointLight
-    position={[0, 1.2, 0]}
+    position={[0, 0.8, 0]}
     color={0x4dc8e8}
     intensity={1 * opacity}
     distance={4}
