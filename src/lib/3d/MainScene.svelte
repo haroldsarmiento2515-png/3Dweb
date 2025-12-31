@@ -7,7 +7,6 @@
   import Mountains from './Mountains.svelte';
   import CaveEnvironment from './CaveEnvironment.svelte';
   import BackgroundParticles from './BackgroundParticles.svelte';
-  import BlurPostProcessing from './BlurPostProcessing.svelte';
 
   // Enable interactivity - must be called inside a Canvas child component
   interactivity({
@@ -64,12 +63,13 @@
   });
 
   // =====================
-  // BACKGROUND COLOR - Clean gray
+  // BACKGROUND COLOR - Clean gray with enhanced fog for blur effect
   // =====================
   const bgColor = 'rgb(180, 185, 195)';
   const fogColor = 'rgb(180, 185, 195)';
-  const fogNear = 15;
-  const fogFar = 50;
+  // Tighter fog creates depth-based blur effect
+  const fogNear = 8;
+  const fogFar = 25;
 
   function handleStoneClick(event) {
     dispatch('stoneClick', event.detail);
@@ -130,7 +130,4 @@
     on:stoneClick={handleStoneClick}
     on:zoomComplete={handleZoomComplete}
   />
-
-  <!-- Blur post-processing for depth-of-field effect -->
-  <BlurPostProcessing enabled={true} focusDistance={8} aperture={0.003} maxblur={0.015} />
 {/if}

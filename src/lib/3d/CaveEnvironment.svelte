@@ -178,15 +178,25 @@
   }
 </script>
 
-<!-- Flat platform floor -->
+<!-- Flat platform floor with soft blurred appearance -->
 <T.Mesh rotation.x={-Math.PI / 2} position.y={-0.5} position.z={0} receiveShadow>
   <T.PlaneGeometry args={[40, 40]} />
   <T.MeshStandardMaterial
-    color={0x8a8a8a}
-    roughness={0.85}
-    metalness={0.05}
+    color={0x9a9a9a}
+    roughness={0.95}
+    metalness={0.0}
     transparent
-    opacity={opacity}
+    opacity={opacity * 0.7}
+  />
+</T.Mesh>
+
+<!-- Additional soft blur layer on ground -->
+<T.Mesh rotation.x={-Math.PI / 2} position.y={-0.48} position.z={0}>
+  <T.PlaneGeometry args={[50, 50]} />
+  <T.MeshBasicMaterial
+    color={0xb4b9c3}
+    transparent
+    opacity={0.4}
   />
 </T.Mesh>
 
