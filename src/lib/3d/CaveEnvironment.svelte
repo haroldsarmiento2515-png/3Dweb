@@ -44,24 +44,32 @@
   // Stone position - stays centered when modal is open
   $: stonePosition = { x: 0, y: 1.5, z: 0 };  // Always centered
 
-  // First stone lift animation - rises from below during transition
-  // Stone starts at y=-4 (below view) and rises to y=0 as transitionProgress goes 0 to 1
+  // First stone lift animation - rises dramatically from below during transition
+  // Stone starts at y=-8 (far below view) and rises to y=0 as transitionProgress goes 0 to 1
   $: firstStoneLiftOffset = (() => {
     if (transitionProgress < 1) {
-      // Ease-out curve for smooth deceleration as stone arrives
+      // Ease-out cubic curve for smooth deceleration as stone arrives
       const easeOut = 1 - Math.pow(1 - transitionProgress, 3);
-      return -4 * (1 - easeOut);  // Starts at -4, ends at 0
+      return -8 * (1 - easeOut);  // Starts at -8, ends at 0
     }
     return 0;
   })();
 
-  // First stone scale animation - grows slightly as it rises
+  // First stone scale animation - grows as it rises for dramatic entrance
   $: firstStoneScaleBoost = (() => {
     if (transitionProgress < 1) {
       const easeOut = 1 - Math.pow(1 - transitionProgress, 2);
-      return 0.7 + (0.3 * easeOut);  // Starts at 0.7, ends at 1.0
+      return 0.4 + (0.6 * easeOut);  // Starts at 0.4, ends at 1.0
     }
     return 1;
+  })();
+
+  // First stone rotation animation - slight rotation as it rises
+  $: firstStoneRotationBoost = (() => {
+    if (transitionProgress < 1) {
+      return (1 - transitionProgress) * Math.PI * 0.5;  // Rotates as it rises
+    }
+    return 0;
   })();
 
   // Target zoom based on modal state (zoom in deep for "inside rock" illusion)
@@ -212,6 +220,7 @@
     <!-- Apply lift animation only to first stone (index 0) during transition -->
     {@const liftOffset = index === 0 ? firstStoneLiftOffset : 0}
     {@const scaleMultiplier = index === 0 ? firstStoneScaleBoost : 1}
+    {@const rotationBoost = index === 0 ? firstStoneRotationBoost : 0}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
     <!-- Main rock mesh - loaded GLTF model -->
@@ -219,7 +228,7 @@
       {@const baseScale = isHovered ? 2.8 : 2.6}
       {@const finalScale = baseScale * animatedZoom * scaleMultiplier}
       <T.Group
-        rotation.y={modalOpen ? rotY * 0.3 : rotY}
+        rotation.y={(modalOpen ? rotY * 0.3 : rotY) + rotationBoost}
         rotation.x={modalOpen ? rotX * 0.3 : rotX}
         rotation.z={index * 0.3}
         scale={finalScale}

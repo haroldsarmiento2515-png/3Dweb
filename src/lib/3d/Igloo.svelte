@@ -8,13 +8,16 @@
   export let opacity = 1;
   export let transitionProgress = 0;  // 0 = no transition, 1 = fully transitioned
 
-  // Calculate shrink effect - igloo shrinks as we "walk away"
-  // Scale goes from 1.0 to 0.3 as transitionProgress goes 0 to 1
-  $: shrinkScale = 1 - (transitionProgress * 0.7);
+  // Ease-out for smoother deceleration
+  $: easeOutProgress = 1 - Math.pow(1 - transitionProgress, 2);
 
-  // Position offset - igloo moves back and down as we walk away
-  $: positionOffsetZ = -transitionProgress * 8;  // Move back into distance
-  $: positionOffsetY = -transitionProgress * 1.5;  // Sink slightly
+  // Calculate shrink effect - igloo shrinks dramatically as we "walk away"
+  // Scale goes from 1.0 to 0.1 with ease-out curve
+  $: shrinkScale = Math.max(0.1, 1 - (easeOutProgress * 0.9));
+
+  // Position offset - igloo moves back significantly and sinks as we walk away
+  $: positionOffsetZ = -easeOutProgress * 15;  // Move far back into distance
+  $: positionOffsetY = -easeOutProgress * 3;   // Sink down more noticeably
 
   let time = 0;
   
