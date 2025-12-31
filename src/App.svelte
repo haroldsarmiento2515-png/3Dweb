@@ -317,12 +317,9 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    z-index: 5;
+    z-index: 2;
     border-radius: 40%;
-  }
-
-  .stone-click-area:hover {
-    background: rgba(255, 255, 255, 0.05);
+    opacity: 0;
   }
 
   .stone-click-area:focus {
