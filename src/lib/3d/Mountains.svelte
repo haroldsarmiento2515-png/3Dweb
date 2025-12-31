@@ -62,29 +62,38 @@
 </script>
 
 {#if isLoaded && mountainScene}
-  <!-- Main mountain - center back, large and dominant -->
+  <!-- Ground platform - mountain terrain under the igloo -->
   <T.Group
-    position={[0, -3, -18]}
-    scale={[120, 120, 120]}
+    position={[0, 8, 0]}
+    scale={[60, 60, 60]}
     rotation={[0, 0, 0]}
   >
     <T is={mountainScene} />
   </T.Group>
 
+  <!-- Main mountain - center back, large and dominant -->
+  <T.Group
+    position={[0, 4, -25]}
+    scale={[150, 150, 150]}
+    rotation={[0, Math.PI, 0]}
+  >
+    <T is={mountainScene.clone()} />
+  </T.Group>
+
   <!-- Second mountain - right side -->
   <T.Group
-    position={[25, -4, -22]}
-    scale={[100, 100, 100]}
-    rotation={[0, 0.5, 0]}
+    position={[30, 3, -30]}
+    scale={[120, 120, 120]}
+    rotation={[0, Math.PI + 0.5, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
 
   <!-- Third mountain - left side -->
   <T.Group
-    position={[-25, -4, -20]}
-    scale={[95, 95, 95]}
-    rotation={[0, -0.5, 0]}
+    position={[-30, 3, -28]}
+    scale={[110, 110, 110]}
+    rotation={[0, Math.PI - 0.5, 0]}
   >
     <T is={mountainScene.clone()} />
   </T.Group>
