@@ -1,0 +1,11 @@
+Model Information:
+* title:	Snow alps Low poly
+* source:	https://sketchfab.com/3d-models/snow-alps-low-poly-11b765d6255e4bf5951ef1409620c2ad
+* author:	TastefullBrick (https://sketchfab.com/tastefullbrick)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Snow alps Low poly" (https://sketchfab.com/3d-models/snow-alps-low-poly-11b765d6255e4bf5951ef1409620c2ad) by TastefullBrick (https://sketchfab.com/tastefullbrick) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)

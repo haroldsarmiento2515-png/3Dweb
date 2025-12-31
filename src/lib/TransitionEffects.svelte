@@ -1,11 +1,132 @@
 <script>
+  import { onMount } from 'svelte';
+
   export let scrollProgress = 0;
-  
-  // This component is now essentially empty - no transition effects
+
+  // Transition timing (matches MainScene.svelte)
+  const TRANSITION_START = 0.05;
+  const TRANSITION_END = 0.12;
+
+  // Calculate effect intensity based on scroll progress
+  $: transitionProgress = Math.min(1, Math.max(0,
+    (scrollProgress - TRANSITION_START) / (TRANSITION_END - TRANSITION_START)
+  ));
+
+  // Peak intensity in the middle of transition
+  $: effectIntensity = Math.sin(transitionProgress * Math.PI);
+
+  // Is the effect active?
+  $: isActive = scrollProgress >= TRANSITION_START && scrollProgress <= TRANSITION_END + 0.02;
+
+  // Chromatic aberration offset (pixels)
+  $: aberrationOffset = effectIntensity * 8;
+
+  // Noise opacity
+  $: noiseOpacity = effectIntensity * 0.4;
+
+  // Glitch bar count (more at peak intensity)
+  $: glitchBarCount = Math.floor(effectIntensity * 12);
+
+  // Fog intensity
+  $: fogOpacity = effectIntensity * 0.7;
+
+  // Generate random glitch bars
+  let glitchBars = [];
+  let animationFrame;
+  let time = 0;
+
+  function generateGlitchBars(count) {
+    const bars = [];
+    for (let i = 0; i < count; i++) {
+      bars.push({
+        top: Math.random() * 100,
+        height: Math.random() * 3 + 0.5,
+        offset: (Math.random() - 0.5) * 30,
+        opacity: Math.random() * 0.7 + 0.3
+      });
+    }
+    return bars;
+  }
+
+  function animate() {
+    time += 0.1;
+
+    // Regenerate glitch bars periodically for animated effect
+    if (isActive && Math.random() > 0.7) {
+      glitchBars = generateGlitchBars(glitchBarCount);
+    }
+
+    animationFrame = requestAnimationFrame(animate);
+  }
+
+  onMount(() => {
+    animate();
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  });
+
+  // Update glitch bars when intensity changes
+  $: if (isActive) {
+    glitchBars = generateGlitchBars(glitchBarCount);
+  }
 </script>
 
-<div class="transition-effects">
-  <!-- Transition effects removed -->
+<div class="transition-effects" class:active={isActive}>
+  <!-- Chromatic Aberration Layer -->
+  {#if isActive}
+    <div
+      class="chromatic-layer red"
+      style="transform: translate({aberrationOffset}px, {aberrationOffset * 0.5}px); opacity: {effectIntensity * 0.5};"
+    ></div>
+    <div
+      class="chromatic-layer cyan"
+      style="transform: translate({-aberrationOffset}px, {-aberrationOffset * 0.5}px); opacity: {effectIntensity * 0.5};"
+    ></div>
+  {/if}
+
+  <!-- Noise Overlay -->
+  {#if isActive}
+    <div class="noise-overlay" style="opacity: {noiseOpacity};"></div>
+  {/if}
+
+  <!-- Horizontal Glitch Bars -->
+  {#if isActive}
+    <div class="glitch-bars">
+      {#each glitchBars as bar}
+        <div
+          class="glitch-bar"
+          style="
+            top: {bar.top}%;
+            height: {bar.height}%;
+            transform: translateX({bar.offset}px);
+            opacity: {bar.opacity * effectIntensity};
+          "
+        ></div>
+      {/each}
+    </div>
+  {/if}
+
+  <!-- Scan Lines -->
+  {#if isActive}
+    <div class="scanlines" style="opacity: {effectIntensity * 0.3};"></div>
+  {/if}
+
+  <!-- Heavy Fog/Mist Effect -->
+  {#if isActive}
+    <div class="dig-fog" style="opacity: {fogOpacity};">
+      <div class="fog-layer fog-1"></div>
+      <div class="fog-layer fog-2"></div>
+      <div class="fog-layer fog-3"></div>
+    </div>
+  {/if}
+
+  <!-- Vignette Intensifier -->
+  {#if isActive}
+    <div class="vignette-intense" style="opacity: {effectIntensity * 0.8};"></div>
+  {/if}
 </div>
 
 <style>
@@ -14,5 +135,146 @@
     inset: 0;
     pointer-events: none;
     z-index: 50;
+    overflow: hidden;
+  }
+
+  .transition-effects:not(.active) {
+    display: none;
+  }
+
+  /* Chromatic Aberration Layers */
+  .chromatic-layer {
+    position: absolute;
+    inset: -10%;
+    mix-blend-mode: screen;
+  }
+
+  .chromatic-layer.red {
+    background: radial-gradient(ellipse at center,
+      rgba(255, 50, 50, 0.3) 0%,
+      rgba(255, 0, 0, 0.1) 40%,
+      transparent 70%
+    );
+  }
+
+  .chromatic-layer.cyan {
+    background: radial-gradient(ellipse at center,
+      rgba(50, 200, 255, 0.3) 0%,
+      rgba(0, 255, 255, 0.1) 40%,
+      transparent 70%
+    );
+  }
+
+  /* Noise Overlay */
+  .noise-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 150px;
+    mix-blend-mode: overlay;
+    animation: noise-shift 0.1s steps(5) infinite;
+  }
+
+  @keyframes noise-shift {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-5px, 5px); }
+    40% { transform: translate(5px, -5px); }
+    60% { transform: translate(-5px, -5px); }
+    80% { transform: translate(5px, 5px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* Glitch Bars */
+  .glitch-bars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .glitch-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 20%,
+      rgba(100, 200, 255, 0.2) 40%,
+      rgba(255, 100, 100, 0.15) 60%,
+      rgba(255, 255, 255, 0.1) 80%,
+      transparent 100%
+    );
+    backdrop-filter: blur(2px);
+  }
+
+  /* Scan Lines */
+  .scanlines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+  }
+
+  /* Fog Layers */
+  .dig-fog {
+    position: absolute;
+    inset: 0;
+  }
+
+  .fog-layer {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center,
+      rgba(200, 210, 220, 0.9) 0%,
+      rgba(180, 190, 200, 0.6) 30%,
+      rgba(150, 160, 170, 0.3) 60%,
+      transparent 100%
+    );
+  }
+
+  .fog-1 {
+    animation: fog-drift-1 3s ease-in-out infinite;
+    transform-origin: center center;
+  }
+
+  .fog-2 {
+    animation: fog-drift-2 4s ease-in-out infinite;
+    opacity: 0.7;
+  }
+
+  .fog-3 {
+    animation: fog-drift-3 5s ease-in-out infinite;
+    opacity: 0.5;
+  }
+
+  @keyframes fog-drift-1 {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.1) translateY(-5%); }
+  }
+
+  @keyframes fog-drift-2 {
+    0%, 100% { transform: scale(1.1) translateX(0); }
+    50% { transform: scale(1) translateX(5%); }
+  }
+
+  @keyframes fog-drift-3 {
+    0%, 100% { transform: scale(0.9) translate(0, 0); }
+    50% { transform: scale(1.05) translate(-3%, 3%); }
+  }
+
+  /* Vignette Intensifier */
+  .vignette-intense {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center,
+      transparent 10%,
+      rgba(20, 30, 40, 0.3) 40%,
+      rgba(10, 15, 25, 0.7) 70%,
+      rgba(5, 10, 15, 0.95) 100%
+    );
   }
 </style>
