@@ -19,6 +19,11 @@
 
   let time = 0;
 
+  // Animated zoom for modal open/close
+  let animatedZoom = 1;
+  let targetZoom = 1;
+  const zoomSpeed = 3; // Higher = faster animation
+
   // =====================
   // NORMAL SCROLL - Show one stone at a time, centered
   // =====================
@@ -35,8 +40,8 @@
   // Stone position - stays centered when modal is open
   $: stonePosition = { x: 0, y: 1.5, z: 0 };  // Always centered
 
-  // Scale modifier for modal state
-  $: modalScaleBoost = modalOpen ? 1.15 : 1;
+  // Target zoom based on modal state (zoom in when open, zoom out when closed)
+  $: targetZoom = modalOpen ? 1.35 : 1;
 
   // Stone hover states
   let hoveredStone = -1;
@@ -107,6 +112,14 @@
 
   useTask((delta) => {
     time += delta;
+
+    // Smooth zoom animation (lerp toward target)
+    const diff = targetZoom - animatedZoom;
+    if (Math.abs(diff) > 0.001) {
+      animatedZoom += diff * Math.min(delta * zoomSpeed, 1);
+    } else {
+      animatedZoom = targetZoom;
+    }
   });
 
   function handleStoneClick(stone, index) {
@@ -163,7 +176,7 @@
     <!-- Main rock mesh - loaded GLTF model -->
     {#if $rockGltf}
       {@const baseScale = isHovered ? 2.8 : 2.6}
-      {@const finalScale = baseScale * modalScaleBoost}
+      {@const finalScale = baseScale * animatedZoom}
       <T.Group
         rotation.y={modalOpen ? rotY * 0.3 : rotY}
         rotation.x={modalOpen ? rotX * 0.3 : rotX}
