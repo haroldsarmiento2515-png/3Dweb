@@ -118,17 +118,18 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.6);
   }
 
   .modal-content {
     position: relative;
-    max-width: 520px;
+    max-width: 580px;
     width: 100%;
     padding: 2rem;
     text-align: center;
     max-height: 85vh;
     overflow-y: auto;
+    background: transparent;
   }
 
   /* Hide scrollbar but keep functionality */
@@ -216,7 +217,7 @@
     font-size: 0.75rem;
     font-weight: 400;
     letter-spacing: 0.08em;
-    color: rgba(216, 218, 223, 0.6);
+    color: rgba(180, 185, 195, 0.7);
     margin-bottom: 1rem;
   }
 
@@ -224,10 +225,9 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     line-height: 1.8;
-    color: rgba(240, 242, 245, 0.95);
+    color: rgba(255, 255, 255, 0.95);
     letter-spacing: 0.01em;
     margin-bottom: 1.25rem;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
   .description:last-child {
@@ -246,13 +246,12 @@
     border: none;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
-    color: rgba(216, 218, 223, 0.85);
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     padding: 0;
     letter-spacing: 0.02em;
     text-decoration: none;
     transition: color 0.2s ease;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
   .link-btn:hover {
