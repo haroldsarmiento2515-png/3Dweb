@@ -336,120 +336,120 @@
     {@const rotationBoost = animations.rotation}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
-    <!-- TECHNO-MINIMAL BACKGROUND - Abstract Constellation Pattern -->
-    <T.Group position={[0, 0, -2]} scale={scaleMultiplier}>
+    <!-- TECHNO-MINIMAL BACKGROUND - Abstract Constellation Pattern (Compressed near rock) -->
+    <T.Group position={[0, 0, -0.8]} scale={scaleMultiplier}>
 
-      <!-- Abstract constellation points - scattered dots -->
+      <!-- Abstract constellation points - scattered dots (compressed) -->
       {#each [
-        [-4.2, 2.8], [-3.5, 1.2], [-4.8, -0.5], [-3.2, -2.4], [-2.0, -3.5],
-        [4.5, 2.2], [3.8, 0.8], [4.2, -1.5], [3.0, -2.8], [2.2, 3.8],
-        [-1.5, 3.2], [0.8, 3.5], [1.8, -3.2], [-0.5, -3.8],
-        [5.2, 0.2], [-5.0, 1.5], [0, 4.2], [-2.5, 0.5], [2.8, 1.5]
+        [-2.1, 1.4], [-1.75, 0.6], [-2.4, -0.25], [-1.6, -1.2], [-1.0, -1.75],
+        [2.25, 1.1], [1.9, 0.4], [2.1, -0.75], [1.5, -1.4], [1.1, 1.9],
+        [-0.75, 1.6], [0.4, 1.75], [0.9, -1.6], [-0.25, -1.9],
+        [2.6, 0.1], [-2.5, 0.75], [0, 2.1], [-1.25, 0.25], [1.4, 0.75]
       ] as [px, py], i}
         {@const pulse = Math.sin(time * 0.8 + i * 0.7) * 0.15}
         <T.Mesh position={[px, py, 0]}>
-          <T.CircleGeometry args={[0.035 + pulse * 0.01, 6]} />
+          <T.CircleGeometry args={[0.03 + pulse * 0.008, 6]} />
           <T.MeshBasicMaterial
             color={0xd1d5db}
             transparent
-            opacity={0.4 + pulse}
+            opacity={0.45 + pulse}
           />
         </T.Mesh>
       {/each}
 
-      <!-- Abstract connecting lines - constellation style -->
+      <!-- Abstract connecting lines - constellation style (compressed) -->
       <!-- Top right cluster -->
       {#each [
-        [[4.5, 2.2], [3.8, 0.8]],
-        [[3.8, 0.8], [5.2, 0.2]],
-        [[4.5, 2.2], [2.2, 3.8]],
-        [[2.2, 3.8], [0.8, 3.5]],
-        [[3.8, 0.8], [2.8, 1.5]]
+        [[2.25, 1.1], [1.9, 0.4]],
+        [[1.9, 0.4], [2.6, 0.1]],
+        [[2.25, 1.1], [1.1, 1.9]],
+        [[1.1, 1.9], [0.4, 1.75]],
+        [[1.9, 0.4], [1.4, 0.75]]
       ] as [[x1, y1], [x2, y2]]}
         {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
         {@const angle = Math.atan2(y2-y1, x2-x1)}
         <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.004]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
+          <T.PlaneGeometry args={[len, 0.003]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
         </T.Mesh>
       {/each}
 
       <!-- Top left cluster -->
       {#each [
-        [[-4.2, 2.8], [-3.5, 1.2]],
-        [[-3.5, 1.2], [-5.0, 1.5]],
-        [[-4.2, 2.8], [-1.5, 3.2]],
-        [[-1.5, 3.2], [0, 4.2]],
-        [[-3.5, 1.2], [-2.5, 0.5]]
+        [[-2.1, 1.4], [-1.75, 0.6]],
+        [[-1.75, 0.6], [-2.5, 0.75]],
+        [[-2.1, 1.4], [-0.75, 1.6]],
+        [[-0.75, 1.6], [0, 2.1]],
+        [[-1.75, 0.6], [-1.25, 0.25]]
       ] as [[x1, y1], [x2, y2]]}
         {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
         {@const angle = Math.atan2(y2-y1, x2-x1)}
         <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.004]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
+          <T.PlaneGeometry args={[len, 0.003]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
         </T.Mesh>
       {/each}
 
       <!-- Bottom right cluster -->
       {#each [
-        [[4.2, -1.5], [3.0, -2.8]],
-        [[3.0, -2.8], [1.8, -3.2]],
-        [[4.2, -1.5], [5.2, 0.2]],
-        [[3.8, 0.8], [4.2, -1.5]]
+        [[2.1, -0.75], [1.5, -1.4]],
+        [[1.5, -1.4], [0.9, -1.6]],
+        [[2.1, -0.75], [2.6, 0.1]],
+        [[1.9, 0.4], [2.1, -0.75]]
       ] as [[x1, y1], [x2, y2]]}
         {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
         {@const angle = Math.atan2(y2-y1, x2-x1)}
         <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.004]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
+          <T.PlaneGeometry args={[len, 0.003]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
         </T.Mesh>
       {/each}
 
       <!-- Bottom left cluster -->
       {#each [
-        [[-4.8, -0.5], [-3.2, -2.4]],
-        [[-3.2, -2.4], [-2.0, -3.5]],
-        [[-2.0, -3.5], [-0.5, -3.8]],
-        [[-4.8, -0.5], [-5.0, 1.5]],
-        [[-3.5, 1.2], [-4.8, -0.5]]
+        [[-2.4, -0.25], [-1.6, -1.2]],
+        [[-1.6, -1.2], [-1.0, -1.75]],
+        [[-1.0, -1.75], [-0.25, -1.9]],
+        [[-2.4, -0.25], [-2.5, 0.75]],
+        [[-1.75, 0.6], [-2.4, -0.25]]
       ] as [[x1, y1], [x2, y2]]}
         {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
         {@const angle = Math.atan2(y2-y1, x2-x1)}
         <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.004]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.25} />
+          <T.PlaneGeometry args={[len, 0.003]} />
+          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
         </T.Mesh>
       {/each}
 
-      <!-- Floating particles moving along paths -->
+      <!-- Floating particles moving along paths (compressed) -->
       {#each Array(5) as _, i}
-        {@const t = (time * 0.15 + i * 0.4) % 1}
+        {@const t = (time * 0.2 + i * 0.4) % 1}
         {@const pathPoints = [
-          [[-4.2, 2.8], [-3.5, 1.2], [-4.8, -0.5], [-3.2, -2.4]],
-          [[4.5, 2.2], [3.8, 0.8], [4.2, -1.5], [3.0, -2.8]],
-          [[-1.5, 3.2], [0, 4.2], [0.8, 3.5], [2.2, 3.8]],
-          [[-2.0, -3.5], [-0.5, -3.8], [1.8, -3.2], [3.0, -2.8]],
-          [[-5.0, 1.5], [-2.5, 0.5], [2.8, 1.5], [5.2, 0.2]]
+          [[-2.1, 1.4], [-1.75, 0.6], [-2.4, -0.25], [-1.6, -1.2]],
+          [[2.25, 1.1], [1.9, 0.4], [2.1, -0.75], [1.5, -1.4]],
+          [[-0.75, 1.6], [0, 2.1], [0.4, 1.75], [1.1, 1.9]],
+          [[-1.0, -1.75], [-0.25, -1.9], [0.9, -1.6], [1.5, -1.4]],
+          [[-2.5, 0.75], [-1.25, 0.25], [1.4, 0.75], [2.6, 0.1]]
         ][i]}
         {@const segIndex = Math.floor(t * (pathPoints.length - 1))}
         {@const segT = (t * (pathPoints.length - 1)) % 1}
         {@const p1 = pathPoints[Math.min(segIndex, pathPoints.length - 2)]}
         {@const p2 = pathPoints[Math.min(segIndex + 1, pathPoints.length - 1)]}
         <T.Mesh position={[p1[0] + (p2[0] - p1[0]) * segT, p1[1] + (p2[1] - p1[1]) * segT, 0]}>
-          <T.CircleGeometry args={[0.025, 6]} />
+          <T.CircleGeometry args={[0.02, 6]} />
           <T.MeshBasicMaterial color={0xffffff} transparent opacity={0.7} />
         </T.Mesh>
       {/each}
 
-      <!-- Subtle pulsing larger dots at key points -->
-      {#each [[-4.2, 2.8], [4.5, 2.2], [-2.0, -3.5], [3.0, -2.8], [0, 4.2]] as [px, py], i}
+      <!-- Subtle pulsing larger dots at key points (compressed) -->
+      {#each [[-2.1, 1.4], [2.25, 1.1], [-1.0, -1.75], [1.5, -1.4], [0, 2.1]] as [px, py], i}
         {@const pulse = Math.sin(time * 0.5 + i * 1.2)}
         <T.Mesh position={[px, py, 0]}>
-          <T.CircleGeometry args={[0.06 + pulse * 0.015, 6]} />
+          <T.CircleGeometry args={[0.05 + pulse * 0.012, 6]} />
           <T.MeshBasicMaterial
             color={0xffffff}
             transparent
-            opacity={0.15 + pulse * 0.1}
+            opacity={0.18 + pulse * 0.1}
           />
         </T.Mesh>
       {/each}
