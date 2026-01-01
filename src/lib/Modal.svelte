@@ -126,7 +126,7 @@
     max-width: 580px;
     width: 100%;
     padding: 0;
-    text-align: center;
+    text-align: left;
     max-height: 85vh;
     overflow-y: auto;
     background: none;
@@ -211,7 +211,7 @@
 
   .content-section {
     margin-bottom: 2rem;
-    text-align: center;
+    text-align: left;
   }
 
   .section-header {
@@ -240,7 +240,7 @@
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .link-btn {
