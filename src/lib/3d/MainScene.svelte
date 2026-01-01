@@ -68,9 +68,9 @@
   });
 
   // =====================
-  // BACKGROUND COLOR - Dark background, no fog/blur
+  // BACKGROUND COLOR - Slate gray background, no fog/blur
   // =====================
-  const bgColor = '#0a0c10';
+  const bgColor = '#64748b';
 
   function handleStoneClick(event) {
     dispatch('stoneClick', event.detail);
