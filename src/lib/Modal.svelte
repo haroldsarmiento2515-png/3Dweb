@@ -12,12 +12,15 @@
 
   let contentRef;
 
-  // Mouse glow state
-  let mouseX = 0;
-  let mouseY = 0;
-  const GLOW_RADIUS = 150; // How far the glow extends from cursor
-  let textSpans = [];
+  // Traveling glow state
   let animationFrameId;
+  let glowWaves = []; // Array of active glow waves { elementId, startIndex, progress, direction }
+  let wrappedElements = new Map(); // Map of element id -> array of char spans
+
+  const GLOW_SPEED = 2; // Characters per frame
+  const GLOW_WIDTH = 15; // How many characters the glow spans
+  let lastHoverTime = 0;
+  const HOVER_THROTTLE = 100; // Minimum ms between triggering new waves
 
   function handleClose() {
     dispatch('close');
@@ -35,45 +38,91 @@
     }
   }
 
-  function handleMouseMove(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+  // Find which character was hovered
+  function handleTextHover(event) {
+    const now = Date.now();
+    if (now - lastHoverTime < HOVER_THROTTLE) return;
+    lastHoverTime = now;
+
+    const target = event.target;
+    if (!target.classList.contains('glow-char')) return;
+
+    const parent = target.parentElement;
+    const elementId = parent.dataset.elementId;
+    if (!elementId) return;
+
+    const chars = wrappedElements.get(elementId);
+    if (!chars) return;
+
+    const charIndex = Array.from(chars).indexOf(target);
+    if (charIndex === -1) return;
+
+    // Start glow waves traveling in both directions from hover point
+    glowWaves.push({
+      elementId,
+      position: charIndex,
+      direction: 1, // Forward
+      life: 1
+    });
+    glowWaves.push({
+      elementId,
+      position: charIndex,
+      direction: -1, // Backward
+      life: 1
+    });
   }
 
-  function updateGlow() {
-    if (!contentRef) {
-      animationFrameId = requestAnimationFrame(updateGlow);
-      return;
-    }
+  function updateGlowWaves() {
+    // Update each wave position
+    glowWaves = glowWaves.map(wave => ({
+      ...wave,
+      position: wave.position + (wave.direction * GLOW_SPEED),
+      life: wave.life - 0.008 // Gradually fade
+    })).filter(wave => wave.life > 0);
 
-    // Get all glow-char spans
-    const chars = contentRef.querySelectorAll('.glow-char');
-
-    chars.forEach(char => {
-      const rect = char.getBoundingClientRect();
-      const charX = rect.left + rect.width / 2;
-      const charY = rect.top + rect.height / 2;
-
-      // Calculate distance from mouse
-      const dx = mouseX - charX;
-      const dy = mouseY - charY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      // Calculate glow intensity (1 at cursor, 0 at GLOW_RADIUS)
-      const intensity = Math.max(0, 1 - distance / GLOW_RADIUS);
-
-      // Apply glow effect
-      if (intensity > 0) {
-        const glowStrength = intensity * intensity; // Quadratic falloff for smoother effect
-        char.style.color = `rgba(255, 255, 255, ${0.6 + glowStrength * 0.4})`;
-        char.style.textShadow = `0 0 ${glowStrength * 8}px rgba(255, 255, 255, ${glowStrength * 0.8}), 0 0 ${glowStrength * 15}px rgba(200, 220, 240, ${glowStrength * 0.5})`;
-      } else {
+    // Reset all characters first
+    wrappedElements.forEach((chars) => {
+      chars.forEach(char => {
         char.style.color = '';
         char.style.textShadow = '';
-      }
+      });
     });
 
-    animationFrameId = requestAnimationFrame(updateGlow);
+    // Apply glow from all active waves
+    glowWaves.forEach(wave => {
+      const chars = wrappedElements.get(wave.elementId);
+      if (!chars) return;
+
+      chars.forEach((char, index) => {
+        const distance = Math.abs(index - wave.position);
+
+        if (distance < GLOW_WIDTH) {
+          // Calculate intensity based on distance from wave center and wave life
+          const proximity = 1 - (distance / GLOW_WIDTH);
+          const intensity = proximity * proximity * wave.life;
+
+          if (intensity > 0.05) {
+            // Get current glow or 0
+            const currentGlow = parseFloat(char.dataset.glow || '0');
+            const newGlow = Math.max(currentGlow, intensity);
+            char.dataset.glow = newGlow;
+
+            // Apply the glow effect
+            char.style.color = `rgba(255, 255, 255, ${0.6 + newGlow * 0.4})`;
+            char.style.textShadow = `0 0 ${newGlow * 10}px rgba(255, 255, 255, ${newGlow * 0.9}), 0 0 ${newGlow * 20}px rgba(200, 220, 240, ${newGlow * 0.6})`;
+          }
+        }
+      });
+    });
+
+    // Clear glow data for next frame
+    wrappedElements.forEach((chars) => {
+      chars.forEach(char => {
+        char.dataset.glow = '0';
+      });
+    });
+
+    animationFrameId = requestAnimationFrame(updateGlowWaves);
   }
 
   // Wrap text in spans for individual character control
@@ -81,37 +130,54 @@
     if (!element) return;
 
     const textElements = element.querySelectorAll('.description, .section-header');
+    let elementCounter = 0;
 
     textElements.forEach(el => {
       if (el.dataset.wrapped) return; // Skip already wrapped
 
+      const elementId = `glow-el-${elementCounter++}`;
+      el.dataset.elementId = elementId;
+
       const text = el.textContent;
       el.innerHTML = '';
+
+      const charSpans = [];
 
       for (let i = 0; i < text.length; i++) {
         const span = document.createElement('span');
         span.className = 'glow-char';
         span.textContent = text[i] === ' ' ? '\u00A0' : text[i]; // Use non-breaking space
         el.appendChild(span);
+        charSpans.push(span);
       }
 
+      wrappedElements.set(elementId, charSpans);
       el.dataset.wrapped = 'true';
+
+      // Add hover listener to the parent element
+      el.addEventListener('mousemove', handleTextHover);
     });
   }
 
   onMount(() => {
     contentRef?.focus();
     window.addEventListener('keydown', handleKeydown);
-    window.addEventListener('mousemove', handleMouseMove);
-    animationFrameId = requestAnimationFrame(updateGlow);
+    animationFrameId = requestAnimationFrame(updateGlowWaves);
   });
 
   onDestroy(() => {
     window.removeEventListener('keydown', handleKeydown);
-    window.removeEventListener('mousemove', handleMouseMove);
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
     }
+    // Clean up hover listeners
+    wrappedElements.forEach((chars, elementId) => {
+      const el = document.querySelector(`[data-element-id="${elementId}"]`);
+      if (el) {
+        el.removeEventListener('mousemove', handleTextHover);
+      }
+    });
+    wrappedElements.clear();
   });
 
   // Wrap text when content becomes visible
