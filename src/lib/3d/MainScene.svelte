@@ -79,6 +79,10 @@
   function handleZoomComplete(event) {
     dispatch('zoomComplete', event.detail);
   }
+
+  function handleZoomThreshold(event) {
+    dispatch('zoomThreshold', event.detail);
+  }
 </script>
 
 <!-- CAMERA - Fixed position, facing forward -->
@@ -128,5 +132,6 @@
     {modalOpen}
     on:stoneClick={handleStoneClick}
     on:zoomComplete={handleZoomComplete}
+    on:zoomThreshold={handleZoomThreshold}
   />
 {/if}

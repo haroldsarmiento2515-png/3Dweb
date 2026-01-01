@@ -42,6 +42,10 @@
     dispatch('zoomComplete', event.detail);
   }
 
+  function handleZoomThreshold(event) {
+    dispatch('zoomThreshold', event.detail);
+  }
+
   onMount(() => {
     mounted = true;
     animate();
@@ -64,6 +68,7 @@
         {modalOpen}
         on:stoneClick={handleStoneClick}
         on:zoomComplete={handleZoomComplete}
+        on:zoomThreshold={handleZoomThreshold}
       />
     </Canvas>
   {/if}

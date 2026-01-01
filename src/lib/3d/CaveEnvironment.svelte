@@ -281,6 +281,17 @@
           dispatch('zoomComplete', { direction: 'in' });
         }
       }
+
+      // For zoom OUT: dispatch blur removal at 70% progress (30% remaining to target)
+      if (lastZoomDirection === 'out' && !zoomThresholdReached) {
+        const totalDistance = startZoom - targetZoom;
+        const currentProgress = startZoom - animatedZoom;
+        const progressPercent = currentProgress / totalDistance;
+        if (progressPercent >= 0.7) {
+          zoomThresholdReached = true;
+          dispatch('zoomThreshold', { direction: 'out' });
+        }
+      }
     } else {
       animatedZoom = targetZoom;
       // For zoom OUT: dispatch when fully complete
