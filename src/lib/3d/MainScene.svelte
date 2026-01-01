@@ -44,6 +44,19 @@
   // Igloo fades during transition
   $: iglooOpacity = Math.max(0, 1 - iglooTransitionProgress * 1.5);
 
+  // Igloo moves backward during transition for smooth visual handoff
+  // Uses easeOutCubic for natural deceleration
+  $: iglooZOffset = (() => {
+    const easeOut = 1 - Math.pow(1 - iglooTransitionProgress, 3);
+    return -8 * easeOut; // Move backward up to -8 units
+  })();
+
+  // Igloo scales down slightly during transition for depth effect
+  $: iglooScale = (() => {
+    const easeOut = 1 - Math.pow(1 - iglooTransitionProgress, 2);
+    return 1 - (0.3 * easeOut); // Scale from 1.0 to 0.7
+  })();
+
   // Platform fades in during transition (starts after 30% of transition)
   $: platformOpacity = Math.min(1, Math.max(0, (iglooTransitionProgress - 0.3) / 0.7));
 
@@ -109,7 +122,7 @@
 <!-- IGLOO SCENE (hero view) -->
 <!-- ===================== -->
 {#if iglooVisible}
-  <T.Group position={[0, 0, 0]} scale={[1, 1, 1]}>
+  <T.Group position={[0, 0, iglooZOffset]} scale={[iglooScale, iglooScale, iglooScale]}>
     <Mountains opacity={iglooOpacity} />
     <Igloo {scrollProgress} visible={true} opacity={iglooOpacity} transitionProgress={iglooTransitionProgress} />
   </T.Group>
