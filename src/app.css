@@ -1,3 +1,5 @@
+@import 'lenis/dist/lenis.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -36,6 +38,17 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: grab;
+}
+
+/* Dragging state - cursor feedback */
+body.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+body.dragging * {
+  cursor: grabbing !important;
 }
 
 /* Canvas container */

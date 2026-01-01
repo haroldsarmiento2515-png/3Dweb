@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import Lenis from 'lenis';
   import Scene from './lib/Scene.svelte';
   import Modal from './lib/Modal.svelte';
   import WireframeOverlay from './lib/WireframeOverlay.svelte';
@@ -19,6 +20,12 @@
   let mounted = false;
   let soundEnabled = false;
   let showUI = true;
+
+  // Smooth scroll & drag state
+  let lenis = null;
+  let isDragging = false;
+  let dragStartY = 0;
+  let scrollStartY = 0;
 
   // Section names for UI display - Simple: Igloo + 4 Stones
   const sectionNames = [
@@ -126,8 +133,10 @@
   $: if (typeof document !== 'undefined') {
     if (modalOpen) {
       document.body.style.overflow = 'hidden';
+      if (lenis) lenis.stop();
     } else if (!isClosing) {
       document.body.style.overflow = '';
+      if (lenis) lenis.start();
     }
   }
 
@@ -156,13 +165,78 @@
     else currentSection = 4;                            // Stone 4
   }
 
+  // Mouse drag scroll handlers
+  function handleMouseDown(e) {
+    // Only activate on left mouse button and not on interactive elements
+    if (e.button !== 0 || modalOpen) return;
+    if (e.target.closest('button, a, input, .modal')) return;
+
+    isDragging = true;
+    dragStartY = e.clientY;
+    scrollStartY = window.scrollY;
+    document.body.classList.add('dragging');
+    e.preventDefault();
+  }
+
+  function handleMouseMove(e) {
+    if (!isDragging) return;
+
+    const deltaY = dragStartY - e.clientY;
+    const newScrollY = scrollStartY + deltaY * 1.5; // Multiplier for sensitivity
+
+    if (lenis) {
+      lenis.scrollTo(newScrollY, { immediate: true });
+    } else {
+      window.scrollTo(0, newScrollY);
+    }
+  }
+
+  function handleMouseUp() {
+    if (isDragging) {
+      isDragging = false;
+      document.body.classList.remove('dragging');
+    }
+  }
+
   onMount(() => {
     mounted = true;
     prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     webglSupported = checkWebGLSupport();
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Initialize Lenis smooth scroll
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth easing
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    });
+
+    // Animation loop for Lenis
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Listen for Lenis scroll events
+    lenis.on('scroll', handleScroll);
+
+    // Mouse drag event listeners
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mouseleave', handleMouseUp);
+
+    return () => {
+      lenis.destroy();
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mouseleave', handleMouseUp);
+    };
   });
 </script>
 
