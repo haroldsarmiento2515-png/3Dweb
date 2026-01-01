@@ -336,17 +336,35 @@
     {@const rotationBoost = animations.rotation}
     <T.Group position={[stonePosition.x, stonePosition.y + floatY + liftOffset, stonePosition.z]}>
 
-    <!-- TECHNO-MINIMAL BACKGROUND - Abstract Constellation Pattern (Compressed near rock) -->
-    <T.Group position={[0, 0, -0.8]} scale={scaleMultiplier}>
+    <!-- TECHNO-MINIMAL BACKGROUND - Unique patterns per stone -->
+    {@const stonePatterns = [
+      // Stone 0 - Vertical elongated pattern (tall rock shape)
+      {
+        dots: [[-1.8, 2.2], [-1.5, 1.0], [-2.0, -0.3], [-1.4, -1.5], [1.6, 2.0], [1.9, 0.8], [1.5, -0.5], [1.8, -1.8], [0, 2.5], [0.3, -2.2]],
+        lines: [[[-1.8, 2.2], [-1.5, 1.0]], [[-1.5, 1.0], [-2.0, -0.3]], [[-2.0, -0.3], [-1.4, -1.5]], [[1.6, 2.0], [1.9, 0.8]], [[1.9, 0.8], [1.5, -0.5]], [[1.5, -0.5], [1.8, -1.8]], [[-1.8, 2.2], [0, 2.5]], [[0, 2.5], [1.6, 2.0]], [[0.3, -2.2], [-1.4, -1.5]], [[0.3, -2.2], [1.8, -1.8]]]
+      },
+      // Stone 1 - Wide horizontal pattern (broad rock shape)
+      {
+        dots: [[-2.5, 1.2], [-1.2, 1.5], [0, 1.0], [1.3, 1.4], [2.4, 1.0], [-2.3, -0.8], [-0.8, -1.2], [0.6, -1.0], [2.2, -0.6], [0, 0]],
+        lines: [[[-2.5, 1.2], [-1.2, 1.5]], [[-1.2, 1.5], [0, 1.0]], [[0, 1.0], [1.3, 1.4]], [[1.3, 1.4], [2.4, 1.0]], [[-2.3, -0.8], [-0.8, -1.2]], [[-0.8, -1.2], [0.6, -1.0]], [[0.6, -1.0], [2.2, -0.6]], [[-2.5, 1.2], [-2.3, -0.8]], [[2.4, 1.0], [2.2, -0.6]], [[0, 1.0], [0, 0]], [[0, 0], [0.6, -1.0]]]
+      },
+      // Stone 2 - Diamond/angular pattern (sharp rock shape)
+      {
+        dots: [[0, 2.3], [-2.2, 0.5], [-1.5, -0.8], [0, -2.0], [1.6, -0.6], [2.3, 0.3], [-0.8, 1.2], [0.9, 1.0], [-1.0, -1.5], [1.2, -1.4]],
+        lines: [[[0, 2.3], [-0.8, 1.2]], [[-0.8, 1.2], [-2.2, 0.5]], [[-2.2, 0.5], [-1.5, -0.8]], [[-1.5, -0.8], [-1.0, -1.5]], [[-1.0, -1.5], [0, -2.0]], [[0, -2.0], [1.2, -1.4]], [[1.2, -1.4], [1.6, -0.6]], [[1.6, -0.6], [2.3, 0.3]], [[2.3, 0.3], [0.9, 1.0]], [[0.9, 1.0], [0, 2.3]]]
+      },
+      // Stone 3 - Irregular scattered pattern (rough rock shape)
+      {
+        dots: [[-1.9, 1.8], [-2.4, 0.2], [-1.0, 0.8], [-0.5, -1.6], [0.8, 2.0], [2.1, 1.2], [1.5, -0.4], [0.3, -2.1], [2.5, -1.0], [-1.6, -1.2]],
+        lines: [[[-1.9, 1.8], [-1.0, 0.8]], [[-1.0, 0.8], [-2.4, 0.2]], [[-2.4, 0.2], [-1.6, -1.2]], [[-1.6, -1.2], [-0.5, -1.6]], [[0.8, 2.0], [2.1, 1.2]], [[2.1, 1.2], [1.5, -0.4]], [[1.5, -0.4], [2.5, -1.0]], [[0.3, -2.1], [-0.5, -1.6]], [[0.3, -2.1], [2.5, -1.0]], [[-1.9, 1.8], [0.8, 2.0]]]
+      }
+    ]}
+    {@const currentPattern = stonePatterns[index % stonePatterns.length]}
+    <T.Group position={[0, 0, -0.8]} scale={scaleMultiplier} rotation.z={index * 0.15}>
 
-      <!-- Abstract constellation points - scattered dots (compressed) -->
-      {#each [
-        [-2.1, 1.4], [-1.75, 0.6], [-2.4, -0.25], [-1.6, -1.2], [-1.0, -1.75],
-        [2.25, 1.1], [1.9, 0.4], [2.1, -0.75], [1.5, -1.4], [1.1, 1.9],
-        [-0.75, 1.6], [0.4, 1.75], [0.9, -1.6], [-0.25, -1.9],
-        [2.6, 0.1], [-2.5, 0.75], [0, 2.1], [-1.25, 0.25], [1.4, 0.75]
-      ] as [px, py], i}
-        {@const pulse = Math.sin(time * 0.8 + i * 0.7) * 0.15}
+      <!-- Constellation dots for this stone -->
+      {#each currentPattern.dots as [px, py], i}
+        {@const pulse = Math.sin(time * 0.8 + i * 0.7 + index * 2) * 0.15}
         <T.Mesh position={[px, py, 0]}>
           <T.CircleGeometry args={[0.03 + pulse * 0.008, 6]} />
           <T.MeshBasicMaterial
@@ -357,15 +375,8 @@
         </T.Mesh>
       {/each}
 
-      <!-- Abstract connecting lines - constellation style (compressed) -->
-      <!-- Top right cluster -->
-      {#each [
-        [[2.25, 1.1], [1.9, 0.4]],
-        [[1.9, 0.4], [2.6, 0.1]],
-        [[2.25, 1.1], [1.1, 1.9]],
-        [[1.1, 1.9], [0.4, 1.75]],
-        [[1.9, 0.4], [1.4, 0.75]]
-      ] as [[x1, y1], [x2, y2]]}
+      <!-- Connecting lines for this stone -->
+      {#each currentPattern.lines as [[x1, y1], [x2, y2]]}
         {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
         {@const angle = Math.atan2(y2-y1, x2-x1)}
         <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
@@ -374,76 +385,24 @@
         </T.Mesh>
       {/each}
 
-      <!-- Top left cluster -->
-      {#each [
-        [[-2.1, 1.4], [-1.75, 0.6]],
-        [[-1.75, 0.6], [-2.5, 0.75]],
-        [[-2.1, 1.4], [-0.75, 1.6]],
-        [[-0.75, 1.6], [0, 2.1]],
-        [[-1.75, 0.6], [-1.25, 0.25]]
-      ] as [[x1, y1], [x2, y2]]}
-        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
-        {@const angle = Math.atan2(y2-y1, x2-x1)}
-        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.003]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
-        </T.Mesh>
-      {/each}
-
-      <!-- Bottom right cluster -->
-      {#each [
-        [[2.1, -0.75], [1.5, -1.4]],
-        [[1.5, -1.4], [0.9, -1.6]],
-        [[2.1, -0.75], [2.6, 0.1]],
-        [[1.9, 0.4], [2.1, -0.75]]
-      ] as [[x1, y1], [x2, y2]]}
-        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
-        {@const angle = Math.atan2(y2-y1, x2-x1)}
-        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.003]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
-        </T.Mesh>
-      {/each}
-
-      <!-- Bottom left cluster -->
-      {#each [
-        [[-2.4, -0.25], [-1.6, -1.2]],
-        [[-1.6, -1.2], [-1.0, -1.75]],
-        [[-1.0, -1.75], [-0.25, -1.9]],
-        [[-2.4, -0.25], [-2.5, 0.75]],
-        [[-1.75, 0.6], [-2.4, -0.25]]
-      ] as [[x1, y1], [x2, y2]]}
-        {@const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2)}
-        {@const angle = Math.atan2(y2-y1, x2-x1)}
-        <T.Mesh position={[(x1+x2)/2, (y1+y2)/2, 0]} rotation.z={angle}>
-          <T.PlaneGeometry args={[len, 0.003]} />
-          <T.MeshBasicMaterial color={0x9ca3af} transparent opacity={0.3} />
-        </T.Mesh>
-      {/each}
-
-      <!-- Floating particles moving along paths (compressed) -->
-      {#each Array(5) as _, i}
-        {@const t = (time * 0.2 + i * 0.4) % 1}
-        {@const pathPoints = [
-          [[-2.1, 1.4], [-1.75, 0.6], [-2.4, -0.25], [-1.6, -1.2]],
-          [[2.25, 1.1], [1.9, 0.4], [2.1, -0.75], [1.5, -1.4]],
-          [[-0.75, 1.6], [0, 2.1], [0.4, 1.75], [1.1, 1.9]],
-          [[-1.0, -1.75], [-0.25, -1.9], [0.9, -1.6], [1.5, -1.4]],
-          [[-2.5, 0.75], [-1.25, 0.25], [1.4, 0.75], [2.6, 0.1]]
-        ][i]}
-        {@const segIndex = Math.floor(t * (pathPoints.length - 1))}
-        {@const segT = (t * (pathPoints.length - 1)) % 1}
-        {@const p1 = pathPoints[Math.min(segIndex, pathPoints.length - 2)]}
-        {@const p2 = pathPoints[Math.min(segIndex + 1, pathPoints.length - 1)]}
+      <!-- Floating particles unique to each stone -->
+      {#each Array(4) as _, i}
+        {@const t = (time * 0.2 + i * 0.5 + index * 0.3) % 1}
+        {@const dotCount = currentPattern.dots.length}
+        {@const idx1 = Math.floor(t * (dotCount - 1))}
+        {@const idx2 = Math.min(idx1 + 1, dotCount - 1)}
+        {@const segT = (t * (dotCount - 1)) % 1}
+        {@const p1 = currentPattern.dots[idx1]}
+        {@const p2 = currentPattern.dots[idx2]}
         <T.Mesh position={[p1[0] + (p2[0] - p1[0]) * segT, p1[1] + (p2[1] - p1[1]) * segT, 0]}>
           <T.CircleGeometry args={[0.02, 6]} />
           <T.MeshBasicMaterial color={0xffffff} transparent opacity={0.7} />
         </T.Mesh>
       {/each}
 
-      <!-- Subtle pulsing larger dots at key points (compressed) -->
-      {#each [[-2.1, 1.4], [2.25, 1.1], [-1.0, -1.75], [1.5, -1.4], [0, 2.1]] as [px, py], i}
-        {@const pulse = Math.sin(time * 0.5 + i * 1.2)}
+      <!-- Key pulsing dots at corners -->
+      {#each [0, 2, 4, 7].map(i => currentPattern.dots[i % currentPattern.dots.length]) as [px, py], i}
+        {@const pulse = Math.sin(time * 0.5 + i * 1.2 + index)}
         <T.Mesh position={[px, py, 0]}>
           <T.CircleGeometry args={[0.05 + pulse * 0.012, 6]} />
           <T.MeshBasicMaterial
