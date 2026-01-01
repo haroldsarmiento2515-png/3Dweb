@@ -75,11 +75,11 @@
     inset: 0;
     background: linear-gradient(
       135deg,
-      #a8b4c4 0%,
-      #c4ccd8 25%,
-      #b8c4d0 50%,
-      #d0d8e4 75%,
-      #bcc8d4 100%
+      #7a8694 0%,
+      #8e9aa8 25%,
+      #828e9c 50%,
+      #96a2b0 75%,
+      #8894a2 100%
     );
     background-size: 400% 400%;
     animation: gradientMove 15s ease infinite;
