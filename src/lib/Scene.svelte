@@ -73,7 +73,7 @@
   .scene-container {
     position: absolute;
     inset: 0;
-    background: #0a0c10;
+    background: #64748b;
   }
 
   .scene-container :global(canvas) {
