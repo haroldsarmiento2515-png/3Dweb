@@ -285,9 +285,9 @@
       <div class="flex justify-between items-start">
         <!-- Left: Logo & Info -->
         <div class="ui-element">
-          <h1 class="logo mb-3">IGLOO</h1>
-          <p class="text-label mb-1">// Copyright © 2024</p>
-          <p class="text-label">
+          <h1 class="logo mb-3 glitch" data-text="IGLOO">IGLOO</h1>
+          <p class="text-label mb-1 glitch" data-text="// Copyright © 2024">// Copyright © 2024</p>
+          <p class="text-label glitch" data-text="Igloo, Inc. All Rights Reserved.">
             Igloo, Inc.<br/>
             All Rights Reserved.
           </p>
@@ -295,8 +295,8 @@
 
         <!-- Right: Manifesto -->
         <div class="ui-element text-right max-w-xs">
-          <p class="text-label mb-3">////// Manifesto</p>
-          <p class="text-body">
+          <p class="text-label mb-3 glitch" data-text="////// Manifesto">////// Manifesto</p>
+          <p class="text-body glitch" data-text="Our mission is to create the largest onchain community, driving the consumer crypto revolution.">
             Our mission is to create the largest onchain community, driving the consumer crypto revolution.
           </p>
         </div>
@@ -306,7 +306,7 @@
       <div class="flex justify-between items-end">
         <!-- Left: Scroll prompt & Sound -->
         <div class="ui-element">
-          <p class="scroll-prompt mb-4">
+          <p class="scroll-prompt mb-4 glitch" data-text="Scroll down to discover.">
             Scroll down to<br/>discover.
           </p>
           <button 
