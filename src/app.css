@@ -38,17 +38,17 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  cursor: grab;
+  cursor: default;
 }
 
-/* Dragging state - cursor feedback */
+/* Dragging state - keep default cursor */
 body.dragging {
-  cursor: grabbing;
+  cursor: default;
   user-select: none;
 }
 
 body.dragging * {
-  cursor: grabbing !important;
+  cursor: default !important;
 }
 
 /* Canvas container */
