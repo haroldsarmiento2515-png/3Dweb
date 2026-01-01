@@ -1,7 +1,7 @@
 <script>
   import { T, useTask } from '@threlte/core';
   import { HTML } from '@threlte/extras';
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import * as THREE from 'three';
 
   export let id = 'stone';
@@ -21,6 +21,151 @@
 
   let hovered = false;
   let stoneGeometry;
+
+  // =====================
+  // TRAVELING GLOW ANIMATION
+  // =====================
+  let glowAnimationFrameId;
+  let glowWaves = [];
+  let wrappedElements = new Map();
+
+  const GLOW_SPEED = 2;
+  const GLOW_WIDTH = 10;
+  let lastHoverTime = 0;
+  const HOVER_THROTTLE = 100;
+
+  function handleLabelTextHover(event) {
+    const now = Date.now();
+    if (now - lastHoverTime < HOVER_THROTTLE) return;
+    lastHoverTime = now;
+
+    const target = event.target;
+    if (!target.classList.contains('stone-glow-char')) return;
+
+    const parent = target.closest('[data-stone-glow-id]');
+    const elementId = parent?.dataset.stoneGlowId;
+    if (!elementId) return;
+
+    const chars = wrappedElements.get(elementId);
+    if (!chars) return;
+
+    const charIndex = Array.from(chars).indexOf(target);
+    if (charIndex === -1) return;
+
+    glowWaves.push({
+      elementId,
+      position: charIndex,
+      direction: 1,
+      life: 1
+    });
+    glowWaves.push({
+      elementId,
+      position: charIndex,
+      direction: -1,
+      life: 1
+    });
+  }
+
+  function updateStoneGlowWaves() {
+    glowWaves = glowWaves.map(wave => ({
+      ...wave,
+      position: wave.position + (wave.direction * GLOW_SPEED),
+      life: wave.life - 0.012
+    })).filter(wave => wave.life > 0);
+
+    wrappedElements.forEach((chars) => {
+      chars.forEach(char => {
+        char.style.color = '';
+        char.style.textShadow = '';
+      });
+    });
+
+    glowWaves.forEach(wave => {
+      const chars = wrappedElements.get(wave.elementId);
+      if (!chars) return;
+
+      chars.forEach((char, idx) => {
+        const distance = Math.abs(idx - wave.position);
+
+        if (distance < GLOW_WIDTH) {
+          const proximity = 1 - (distance / GLOW_WIDTH);
+          const intensity = proximity * proximity * wave.life;
+
+          if (intensity > 0.05) {
+            const currentGlow = parseFloat(char.dataset.glow || '0');
+            const newGlow = Math.max(currentGlow, intensity);
+            char.dataset.glow = newGlow;
+
+            char.style.color = `rgba(255, 255, 255, ${0.7 + newGlow * 0.3})`;
+            char.style.textShadow = `0 0 ${newGlow * 8}px rgba(255, 255, 255, ${newGlow * 0.9}), 0 0 ${newGlow * 15}px rgba(200, 220, 240, ${newGlow * 0.6})`;
+          }
+        }
+      });
+    });
+
+    wrappedElements.forEach((chars) => {
+      chars.forEach(char => {
+        char.dataset.glow = '0';
+      });
+    });
+
+    glowAnimationFrameId = requestAnimationFrame(updateStoneGlowWaves);
+  }
+
+  function wrapStoneLabelText(container) {
+    if (!container) return;
+
+    const textElements = container.querySelectorAll('.label-index, .label-name, .click-prompt span');
+    let elementCounter = wrappedElements.size;
+
+    textElements.forEach(el => {
+      if (el.dataset.wrapped) return;
+
+      const elementId = `stone-glow-el-${index}-${elementCounter++}`;
+      el.dataset.stoneGlowId = elementId;
+
+      const text = el.textContent;
+      el.innerHTML = '';
+
+      const charSpans = [];
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement('span');
+        span.className = 'stone-glow-char';
+        span.textContent = text[i] === ' ' ? '\u00A0' : text[i];
+        el.appendChild(span);
+        charSpans.push(span);
+      }
+
+      wrappedElements.set(elementId, charSpans);
+      el.dataset.wrapped = 'true';
+      el.addEventListener('mousemove', handleLabelTextHover);
+    });
+  }
+
+  function initStoneLabelGlow() {
+    setTimeout(() => {
+      const stoneLabels = document.querySelectorAll('.stone-label, .click-prompt');
+      stoneLabels.forEach(container => {
+        wrapStoneLabelText(container);
+      });
+    }, 300);
+
+    glowAnimationFrameId = requestAnimationFrame(updateStoneGlowWaves);
+  }
+
+  function cleanupStoneLabelGlow() {
+    if (glowAnimationFrameId) {
+      cancelAnimationFrame(glowAnimationFrameId);
+    }
+    wrappedElements.forEach((chars, elementId) => {
+      const el = document.querySelector(`[data-stone-glow-id="${elementId}"]`);
+      if (el) {
+        el.removeEventListener('mousemove', handleLabelTextHover);
+      }
+    });
+    wrappedElements.clear();
+  }
 
   // Create stone geometry with organic displacement
   function createStoneGeometry(type, size = 1.8) {
@@ -70,6 +215,11 @@
 
   onMount(() => {
     stoneGeometry = createStoneGeometry(geometry);
+    initStoneLabelGlow();
+  });
+
+  onDestroy(() => {
+    cleanupStoneLabelGlow();
   });
 
   // Animation values
@@ -163,7 +313,7 @@
         position={[-3.5, 1.5, 0]}
         transform
         occlude={false}
-        style="pointer-events: none;"
+        style="pointer-events: auto;"
       >
         <div class="stone-label" class:active={isActive} class:hovered={hovered}>
           <span class="label-index">SPECIMEN_{String(index + 1).padStart(2, '0')}</span>
@@ -176,7 +326,7 @@
         position={[3, -1.5, 0]}
         transform
         occlude={false}
-        style="pointer-events: none;"
+        style="pointer-events: auto;"
       >
         <div class="click-prompt" class:active={isActive}>
           <span>CLICK TO EXPLORE</span>
@@ -238,6 +388,14 @@
 {/if}
 
 <style>
+  /* Stone glow character styles */
+  :global(.stone-glow-char) {
+    display: inline;
+    transition: color 0.1s ease, text-shadow 0.1s ease;
+    will-change: color, text-shadow;
+    cursor: default;
+  }
+
   :global(.stone-label) {
     font-family: 'JetBrains Mono', monospace;
     color: rgba(255, 255, 255, 0.6);

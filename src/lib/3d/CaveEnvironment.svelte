@@ -1,8 +1,154 @@
 <script>
   import { T, useTask } from '@threlte/core';
   import { HTML, useGltf } from '@threlte/extras';
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy, tick } from 'svelte';
   import * as THREE from 'three';
+
+  // =====================
+  // TRAVELING GLOW ANIMATION
+  // =====================
+  let glowAnimationFrameId;
+  let glowWaves = [];
+  let wrappedElements = new Map();
+
+  const GLOW_SPEED = 2;
+  const GLOW_WIDTH = 12;
+  let lastHoverTime = 0;
+  const HOVER_THROTTLE = 100;
+
+  function handleTextHover(event) {
+    const now = Date.now();
+    if (now - lastHoverTime < HOVER_THROTTLE) return;
+    lastHoverTime = now;
+
+    const target = event.target;
+    if (!target.classList.contains('rock-glow-char')) return;
+
+    const parent = target.closest('[data-glow-element-id]');
+    const elementId = parent?.dataset.glowElementId;
+    if (!elementId) return;
+
+    const chars = wrappedElements.get(elementId);
+    if (!chars) return;
+
+    const charIndex = Array.from(chars).indexOf(target);
+    if (charIndex === -1) return;
+
+    glowWaves.push({
+      elementId,
+      position: charIndex,
+      direction: 1,
+      life: 1
+    });
+    glowWaves.push({
+      elementId,
+      position: charIndex,
+      direction: -1,
+      life: 1
+    });
+  }
+
+  function updateRockGlowWaves() {
+    glowWaves = glowWaves.map(wave => ({
+      ...wave,
+      position: wave.position + (wave.direction * GLOW_SPEED),
+      life: wave.life - 0.01
+    })).filter(wave => wave.life > 0);
+
+    wrappedElements.forEach((chars) => {
+      chars.forEach(char => {
+        char.style.color = '';
+        char.style.textShadow = '';
+      });
+    });
+
+    glowWaves.forEach(wave => {
+      const chars = wrappedElements.get(wave.elementId);
+      if (!chars) return;
+
+      chars.forEach((char, index) => {
+        const distance = Math.abs(index - wave.position);
+
+        if (distance < GLOW_WIDTH) {
+          const proximity = 1 - (distance / GLOW_WIDTH);
+          const intensity = proximity * proximity * wave.life;
+
+          if (intensity > 0.05) {
+            const currentGlow = parseFloat(char.dataset.glow || '0');
+            const newGlow = Math.max(currentGlow, intensity);
+            char.dataset.glow = newGlow;
+
+            char.style.color = `rgba(255, 255, 255, ${0.7 + newGlow * 0.3})`;
+            char.style.textShadow = `0 0 ${newGlow * 8}px rgba(255, 255, 255, ${newGlow * 0.9}), 0 0 ${newGlow * 15}px rgba(200, 220, 240, ${newGlow * 0.6})`;
+          }
+        }
+      });
+    });
+
+    wrappedElements.forEach((chars) => {
+      chars.forEach(char => {
+        char.dataset.glow = '0';
+      });
+    });
+
+    glowAnimationFrameId = requestAnimationFrame(updateRockGlowWaves);
+  }
+
+  function wrapRockTextInSpans(container) {
+    if (!container) return;
+
+    const textElements = container.querySelectorAll('.info-id, .info-name, .temp-label, .temp-value, .temp-secondary, .date-text, .cta-text');
+    let elementCounter = wrappedElements.size;
+
+    textElements.forEach(el => {
+      if (el.dataset.wrapped) return;
+
+      const elementId = `rock-glow-el-${elementCounter++}`;
+      el.dataset.glowElementId = elementId;
+
+      const text = el.textContent;
+      el.innerHTML = '';
+
+      const charSpans = [];
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement('span');
+        span.className = 'rock-glow-char';
+        span.textContent = text[i] === ' ' ? '\u00A0' : text[i];
+        el.appendChild(span);
+        charSpans.push(span);
+      }
+
+      wrappedElements.set(elementId, charSpans);
+      el.dataset.wrapped = 'true';
+      el.addEventListener('mousemove', handleTextHover);
+    });
+  }
+
+  function initRockGlowAnimation() {
+    // Wait for DOM to be ready, then wrap text elements
+    setTimeout(() => {
+      const stoneInfoElements = document.querySelectorAll('.stone-info');
+      stoneInfoElements.forEach(container => {
+        wrapRockTextInSpans(container);
+      });
+    }, 500);
+
+    glowAnimationFrameId = requestAnimationFrame(updateRockGlowWaves);
+  }
+
+  function cleanupRockGlowAnimation() {
+    if (glowAnimationFrameId) {
+      cancelAnimationFrame(glowAnimationFrameId);
+    }
+    wrappedElements.forEach((chars, elementId) => {
+      const el = document.querySelector(`[data-glow-element-id="${elementId}"]`);
+      if (el) {
+        el.removeEventListener('mousemove', handleTextHover);
+      }
+    });
+    wrappedElements.clear();
+  }
 
   // Load the rock GLTF model
   const rockGltf = useGltf('/models/rock/scene.gltf');
@@ -253,6 +399,11 @@
       stoneGeometries[i] = createStoneGeometry(stone.geometry);
     });
     geometriesReady = true;
+    initRockGlowAnimation();
+  });
+
+  onDestroy(() => {
+    cleanupRockGlowAnimation();
   });
 
   // Also try to create geometries reactively if stones array changes
@@ -531,7 +682,7 @@
           position={[-2.2, 1.6, 0]}
           center
           occlude={false}
-          style="pointer-events: none;"
+          style="pointer-events: auto;"
         >
           <div class="stone-info top-left" class:hovered={isHovered}>
             <div class="info-id">PORTFOLIO_CO_{String(index + 1).padStart(2, '0')}</div>
@@ -549,7 +700,7 @@
           position={[2.8, 0.4, 0]}
           center
           occlude={false}
-          style="pointer-events: none;"
+          style="pointer-events: auto;"
         >
           <div class="stone-info right-side" class:hovered={isHovered}>
             <div class="temp-row">
@@ -565,7 +716,7 @@
           position={[1.8, -1.4, 0]}
           center
           occlude={false}
-          style="pointer-events: none;"
+          style="pointer-events: auto;"
         >
           <div class="stone-info bottom-info" class:hovered={isHovered}>
             <!-- Connecting line from stone -->
@@ -584,6 +735,14 @@
 {/each}
 
 <style>
+  /* Rock glow character styles */
+  :global(.rock-glow-char) {
+    display: inline;
+    transition: color 0.1s ease, text-shadow 0.1s ease;
+    will-change: color, text-shadow;
+    cursor: default;
+  }
+
   /* Stone Info - Clean floating labels with connecting lines */
   :global(.stone-info) {
     font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
