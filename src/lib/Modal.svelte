@@ -6,6 +6,7 @@
   export let stone;
   export let stoneIndex = 0;
   export let showContent = false;
+  export let hideBlur = false;
 
   const dispatch = createEventDispatcher();
 
@@ -39,6 +40,7 @@
 
 <div
   class="modal-backdrop"
+  class:no-blur={hideBlur}
   on:click={handleBackdropClick}
   on:keydown={handleKeydown}
   role="button"
@@ -119,6 +121,15 @@
     justify-content: center;
     padding: 2rem;
     background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease, background 0.3s ease;
+  }
+
+  .modal-backdrop.no-blur {
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    background: rgba(0, 0, 0, 0);
   }
 
   .modal-content {

@@ -13,6 +13,7 @@
   let modalOpen = false;
   let showModalContent = false; // Separate state for modal content visibility
   let isClosing = false; // Track if we're in closing animation
+  let hideBlur = false; // Track when to hide blur effect during close animation
   let selectedStone = null;
   let selectedStoneIndex = 0;
   let webglSupported = true;
@@ -102,6 +103,7 @@
     selectedStone = stone;
     selectedStoneIndex = stones.findIndex(s => s.id === stone.id);
     modalOpen = true; // This triggers zoom in
+    hideBlur = false; // Reset blur visibility when opening
     // Content will show when zoomComplete event fires with direction 'in'
   }
 
@@ -116,6 +118,15 @@
       selectedStone = null;
       selectedStoneIndex = 0;
       isClosing = false;
+      hideBlur = false; // Reset for next open
+    }
+  }
+
+  // Handle zoom threshold event - blur should hide at 70% of zoom out
+  function handleZoomThreshold(event) {
+    const { direction } = event.detail;
+    if (direction === 'out') {
+      hideBlur = true; // Hide blur effect early
     }
   }
 
@@ -256,6 +267,7 @@
         {modalOpen}
         on:stoneClick={(e) => handleStoneClick(e.detail)}
         on:zoomComplete={handleZoomComplete}
+        on:zoomThreshold={handleZoomThreshold}
       />
     </div>
   {/if}
@@ -366,6 +378,7 @@
       stone={selectedStone}
       stoneIndex={selectedStoneIndex}
       showContent={showModalContent}
+      {hideBlur}
       on:close={handleModalClose}
     />
   {/if}
