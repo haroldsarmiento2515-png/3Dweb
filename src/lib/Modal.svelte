@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy, tick } from 'svelte';
   import { fly, fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
 
@@ -12,12 +12,12 @@
 
   let contentRef;
 
-  // Mouse trail state
-  const TRAIL_LENGTH = 12;
-  let trailPositions = [];
-  let isOverText = false;
+  // Mouse glow state
+  let mouseX = 0;
+  let mouseY = 0;
+  const GLOW_RADIUS = 150; // How far the glow extends from cursor
+  let textSpans = [];
   let animationFrameId;
-  let trailContainer;
 
   function handleClose() {
     dispatch('close');
@@ -35,63 +35,75 @@
     }
   }
 
-  // Check if element is a text element
-  function isTextElement(element) {
-    if (!element) return false;
-    const textClasses = ['description', 'section-header', 'link-btn', 'close-text'];
-    const textTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'A', 'SPAN'];
-
-    // Check if element or its parent has text class
-    let current = element;
-    while (current && current !== contentRef) {
-      if (textClasses.some(cls => current.classList?.contains(cls))) {
-        return true;
-      }
-      if (textTags.includes(current.tagName)) {
-        return true;
-      }
-      current = current.parentElement;
-    }
-    return false;
-  }
-
   function handleMouseMove(event) {
-    // Check if mouse is over text
-    const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
-    isOverText = isTextElement(elementUnderMouse);
-
-    if (isOverText) {
-      // Add new position to the beginning
-      trailPositions = [
-        { x: event.clientX, y: event.clientY, opacity: 1 },
-        ...trailPositions.slice(0, TRAIL_LENGTH - 1)
-      ];
-    } else {
-      // Fade out existing trail
-      if (trailPositions.length > 0) {
-        trailPositions = trailPositions
-          .map(p => ({ ...p, opacity: p.opacity * 0.85 }))
-          .filter(p => p.opacity > 0.01);
-      }
-    }
+    mouseX = event.clientX;
+    mouseY = event.clientY;
   }
 
-  function animateTrail() {
-    // Gradually fade trail positions
-    if (trailPositions.length > 0) {
-      trailPositions = trailPositions.map((pos, i) => ({
-        ...pos,
-        opacity: isOverText ? Math.max(0.1, 1 - (i / TRAIL_LENGTH) * 0.9) : pos.opacity * 0.92
-      })).filter(p => p.opacity > 0.01);
+  function updateGlow() {
+    if (!contentRef) {
+      animationFrameId = requestAnimationFrame(updateGlow);
+      return;
     }
-    animationFrameId = requestAnimationFrame(animateTrail);
+
+    // Get all glow-char spans
+    const chars = contentRef.querySelectorAll('.glow-char');
+
+    chars.forEach(char => {
+      const rect = char.getBoundingClientRect();
+      const charX = rect.left + rect.width / 2;
+      const charY = rect.top + rect.height / 2;
+
+      // Calculate distance from mouse
+      const dx = mouseX - charX;
+      const dy = mouseY - charY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Calculate glow intensity (1 at cursor, 0 at GLOW_RADIUS)
+      const intensity = Math.max(0, 1 - distance / GLOW_RADIUS);
+
+      // Apply glow effect
+      if (intensity > 0) {
+        const glowStrength = intensity * intensity; // Quadratic falloff for smoother effect
+        char.style.color = `rgba(255, 255, 255, ${0.6 + glowStrength * 0.4})`;
+        char.style.textShadow = `0 0 ${glowStrength * 8}px rgba(255, 255, 255, ${glowStrength * 0.8}), 0 0 ${glowStrength * 15}px rgba(200, 220, 240, ${glowStrength * 0.5})`;
+      } else {
+        char.style.color = '';
+        char.style.textShadow = '';
+      }
+    });
+
+    animationFrameId = requestAnimationFrame(updateGlow);
+  }
+
+  // Wrap text in spans for individual character control
+  function wrapTextInSpans(element) {
+    if (!element) return;
+
+    const textElements = element.querySelectorAll('.description, .section-header');
+
+    textElements.forEach(el => {
+      if (el.dataset.wrapped) return; // Skip already wrapped
+
+      const text = el.textContent;
+      el.innerHTML = '';
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement('span');
+        span.className = 'glow-char';
+        span.textContent = text[i] === ' ' ? '\u00A0' : text[i]; // Use non-breaking space
+        el.appendChild(span);
+      }
+
+      el.dataset.wrapped = 'true';
+    });
   }
 
   onMount(() => {
     contentRef?.focus();
     window.addEventListener('keydown', handleKeydown);
     window.addEventListener('mousemove', handleMouseMove);
-    animationFrameId = requestAnimationFrame(animateTrail);
+    animationFrameId = requestAnimationFrame(updateGlow);
   });
 
   onDestroy(() => {
@@ -101,24 +113,12 @@
       cancelAnimationFrame(animationFrameId);
     }
   });
-</script>
 
-<!-- Mouse trail -->
-{#if trailPositions.length > 0}
-  <div class="mouse-trail-container" bind:this={trailContainer}>
-    {#each trailPositions as pos, i (i)}
-      <div
-        class="trail-dot"
-        style="
-          left: {pos.x}px;
-          top: {pos.y}px;
-          opacity: {pos.opacity * 0.8};
-          transform: translate(-50%, -50%) scale({1 - (i / TRAIL_LENGTH) * 0.6});
-        "
-      ></div>
-    {/each}
-  </div>
-{/if}
+  // Wrap text when content becomes visible
+  $: if (showContent && contentRef) {
+    tick().then(() => wrapTextInSpans(contentRef));
+  }
+</script>
 
 <div
   class="modal-backdrop"
@@ -194,33 +194,11 @@
 </div>
 
 <style>
-  /* Mouse trail styles */
-  .mouse-trail-container {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 200;
-    overflow: hidden;
-  }
-
-  .trail-dot {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.9) 0%,
-      rgba(200, 220, 240, 0.6) 40%,
-      rgba(180, 200, 220, 0.2) 70%,
-      transparent 100%
-    );
-    border-radius: 50%;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    filter: blur(0.5px);
-    box-shadow:
-      0 0 4px rgba(255, 255, 255, 0.5),
-      0 0 8px rgba(200, 220, 240, 0.3);
+  /* Text glow character styles */
+  :global(.glow-char) {
+    display: inline;
+    transition: color 0.1s ease, text-shadow 0.1s ease;
+    will-change: color, text-shadow;
   }
 
   .modal-backdrop {
