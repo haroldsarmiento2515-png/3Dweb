@@ -12,6 +12,13 @@
 
   let contentRef;
 
+  // Mouse trail state
+  const TRAIL_LENGTH = 12;
+  let trailPositions = [];
+  let isOverText = false;
+  let animationFrameId;
+  let trailContainer;
+
   function handleClose() {
     dispatch('close');
   }
@@ -28,15 +35,90 @@
     }
   }
 
+  // Check if element is a text element
+  function isTextElement(element) {
+    if (!element) return false;
+    const textClasses = ['description', 'section-header', 'link-btn', 'close-text'];
+    const textTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'A', 'SPAN'];
+
+    // Check if element or its parent has text class
+    let current = element;
+    while (current && current !== contentRef) {
+      if (textClasses.some(cls => current.classList?.contains(cls))) {
+        return true;
+      }
+      if (textTags.includes(current.tagName)) {
+        return true;
+      }
+      current = current.parentElement;
+    }
+    return false;
+  }
+
+  function handleMouseMove(event) {
+    // Check if mouse is over text
+    const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
+    isOverText = isTextElement(elementUnderMouse);
+
+    if (isOverText) {
+      // Add new position to the beginning
+      trailPositions = [
+        { x: event.clientX, y: event.clientY, opacity: 1 },
+        ...trailPositions.slice(0, TRAIL_LENGTH - 1)
+      ];
+    } else {
+      // Fade out existing trail
+      if (trailPositions.length > 0) {
+        trailPositions = trailPositions
+          .map(p => ({ ...p, opacity: p.opacity * 0.85 }))
+          .filter(p => p.opacity > 0.01);
+      }
+    }
+  }
+
+  function animateTrail() {
+    // Gradually fade trail positions
+    if (trailPositions.length > 0) {
+      trailPositions = trailPositions.map((pos, i) => ({
+        ...pos,
+        opacity: isOverText ? Math.max(0.1, 1 - (i / TRAIL_LENGTH) * 0.9) : pos.opacity * 0.92
+      })).filter(p => p.opacity > 0.01);
+    }
+    animationFrameId = requestAnimationFrame(animateTrail);
+  }
+
   onMount(() => {
     contentRef?.focus();
     window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('mousemove', handleMouseMove);
+    animationFrameId = requestAnimationFrame(animateTrail);
   });
 
   onDestroy(() => {
     window.removeEventListener('keydown', handleKeydown);
+    window.removeEventListener('mousemove', handleMouseMove);
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
   });
 </script>
+
+<!-- Mouse trail -->
+{#if trailPositions.length > 0}
+  <div class="mouse-trail-container" bind:this={trailContainer}>
+    {#each trailPositions as pos, i (i)}
+      <div
+        class="trail-dot"
+        style="
+          left: {pos.x}px;
+          top: {pos.y}px;
+          opacity: {pos.opacity * 0.8};
+          transform: translate(-50%, -50%) scale({1 - (i / TRAIL_LENGTH) * 0.6});
+        "
+      ></div>
+    {/each}
+  </div>
+{/if}
 
 <div
   class="modal-backdrop"
@@ -112,6 +194,35 @@
 </div>
 
 <style>
+  /* Mouse trail styles */
+  .mouse-trail-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 200;
+    overflow: hidden;
+  }
+
+  .trail-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(200, 220, 240, 0.6) 40%,
+      rgba(180, 200, 220, 0.2) 70%,
+      transparent 100%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    filter: blur(0.5px);
+    box-shadow:
+      0 0 4px rgba(255, 255, 255, 0.5),
+      0 0 8px rgba(200, 220, 240, 0.3);
+  }
+
   .modal-backdrop {
     position: fixed;
     inset: 0;
