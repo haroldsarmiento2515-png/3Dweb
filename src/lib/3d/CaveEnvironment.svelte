@@ -125,14 +125,41 @@
     });
   }
 
+  let glowObserver = null;
+
+  function wrapAllStoneInfoElements() {
+    const stoneInfoElements = document.querySelectorAll('.stone-info');
+    stoneInfoElements.forEach(container => {
+      wrapRockTextInSpans(container);
+    });
+  }
+
   function initRockGlowAnimation() {
-    // Wait for DOM to be ready, then wrap text elements
-    setTimeout(() => {
-      const stoneInfoElements = document.querySelectorAll('.stone-info');
-      stoneInfoElements.forEach(container => {
-        wrapRockTextInSpans(container);
+    // Initial wrap
+    wrapAllStoneInfoElements();
+
+    // Use MutationObserver to watch for dynamically added stone-info elements
+    glowObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) { // Element node
+            if (node.classList?.contains('stone-info')) {
+              wrapRockTextInSpans(node);
+            }
+            // Also check children
+            const stoneInfos = node.querySelectorAll?.('.stone-info');
+            stoneInfos?.forEach(container => {
+              wrapRockTextInSpans(container);
+            });
+          }
+        });
       });
-    }, 500);
+    });
+
+    glowObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
 
     glowAnimationFrameId = requestAnimationFrame(updateRockGlowWaves);
   }
@@ -140,6 +167,10 @@
   function cleanupRockGlowAnimation() {
     if (glowAnimationFrameId) {
       cancelAnimationFrame(glowAnimationFrameId);
+    }
+    if (glowObserver) {
+      glowObserver.disconnect();
+      glowObserver = null;
     }
     wrappedElements.forEach((chars, elementId) => {
       const el = document.querySelector(`[data-glow-element-id="${elementId}"]`);
@@ -164,6 +195,11 @@
   const dispatch = createEventDispatcher();
 
   let time = 0;
+
+  // Scroll-based rotation
+  let prevScrollProgress = 0;
+  let scrollVelocity = 0;
+  let smoothScrollRotation = 0;
 
   // Animated zoom for modal open/close
   let animatedZoom = 1;
@@ -417,6 +453,19 @@
   useTask((delta) => {
     time += delta;
 
+    // Calculate scroll velocity for rock rotation
+    const scrollDelta = scrollProgress - prevScrollProgress;
+    scrollVelocity = scrollDelta * 50; // Amplify for visible effect
+    prevScrollProgress = scrollProgress;
+
+    // Smooth the scroll rotation (lerp toward target)
+    const targetScrollRotation = scrollVelocity * 0.5;
+    smoothScrollRotation += (targetScrollRotation - smoothScrollRotation) * Math.min(delta * 8, 1);
+    // Decay rotation when not scrolling
+    if (Math.abs(scrollDelta) < 0.0001) {
+      smoothScrollRotation *= 0.95;
+    }
+
     // Smooth zoom animation (lerp toward target)
     const diff = targetZoom - animatedZoom;
     if (Math.abs(diff) > 0.001) {
@@ -486,6 +535,8 @@
   {@const floatY = Math.sin(time * 0.4 + index * 1.5) * 0.06}
   {@const rotY = time * 0.12 + index * Math.PI * 0.5}
   {@const rotX = Math.sin(time * 0.15 + index) * 0.08}
+  {@const scrollRotX = smoothScrollRotation * 0.3}
+  {@const scrollRotZ = smoothScrollRotation * 0.15}
 
   <!-- Show stone based on visibility flags - allows gap between stones -->
   {@const stoneVisible = stoneVisibility[index] ?? false}
@@ -584,8 +635,8 @@
       {@const finalScale = baseScale * animatedZoom * scaleMultiplier}
       <T.Group
         rotation.y={(modalOpen ? rotY * 0.3 : rotY) + rotationBoost}
-        rotation.x={modalOpen ? rotX * 0.3 : rotX}
-        rotation.z={index * 0.3}
+        rotation.x={(modalOpen ? rotX * 0.3 : rotX) + scrollRotX}
+        rotation.z={index * 0.3 + scrollRotZ}
         scale={finalScale}
       >
         {#each Object.values($rockGltf.nodes) as node}
