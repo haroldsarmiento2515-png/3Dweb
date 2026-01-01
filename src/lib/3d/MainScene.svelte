@@ -68,9 +68,9 @@
   });
 
   // =====================
-  // BACKGROUND COLOR - Slate gray background, no fog/blur
+  // BACKGROUND COLOR - Transparent to show CSS gradient
   // =====================
-  const bgColor = '#64748b';
+  const bgColor = null;
 
   function handleStoneClick(event) {
     dispatch('stoneClick', event.detail);
@@ -91,8 +91,7 @@
   far={100}
 />
 
-<!-- BACKGROUND - Dark, no fog -->
-<T.Color attach="background" args={[bgColor]} />
+<!-- BACKGROUND - Transparent to show CSS gradient behind -->
 
 <!-- ===================== -->
 <!-- MAIN SCENE LIGHTING  -->

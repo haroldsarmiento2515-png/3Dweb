@@ -55,7 +55,7 @@
 
 <div class="scene-container">
   {#if mounted}
-    <Canvas>
+    <Canvas rendererParameters={{ alpha: true, antialias: true }}>
       <MainScene
         {scrollProgress}
         {currentSection}
@@ -73,7 +73,28 @@
   .scene-container {
     position: absolute;
     inset: 0;
-    background: #64748b;
+    background: linear-gradient(
+      135deg,
+      #a8b4c4 0%,
+      #c4ccd8 25%,
+      #b8c4d0 50%,
+      #d0d8e4 75%,
+      #bcc8d4 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+  }
+
+  @keyframes gradientMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .scene-container :global(canvas) {
